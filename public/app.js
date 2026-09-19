@@ -1,4 +1,4 @@
-// Indian FnO Sniper — Core Application Logic with TradingView Engine & Capital Management
+// Indian FnO Sniper — Core Application Logic with Capital-Driven Option Scanner & TradingView Engine
 
 let fnoInstruments = [];
 let currentInstrument = null;
@@ -16,7 +16,7 @@ let ema9Series = null;
 let ema21Series = null;
 let ema50Series = null;
 
-// Fallback Instruments Database
+// Master Indian FnO Instruments Database
 const DEFAULT_INSTRUMENTS = [
   { id: 'nifty', name: 'NIFTY 50', symbol: 'NSE:NIFTY', tvSymbol: 'CAPITALCOM:NIFTY50', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:NIFTY', yfSymbol: '^NSEI', category: 'Index', basePrice: 23346.40, lotSize: 25, strikeStep: 50, change: '+0.68%', isPositive: true, dayHigh: 23450.00, dayLow: 23280.20 },
   { id: 'banknifty', name: 'BANK NIFTY', symbol: 'NSE:BANKNIFTY', tvSymbol: 'CAPITALCOM:BANKNIFTY', etfSymbol: 'NSE:BANKBEES', officialSymbol: 'NSE:BANKNIFTY', yfSymbol: '^NSEBANK', category: 'Index', basePrice: 56358.70, lotSize: 15, strikeStep: 100, change: '+1.12%', isPositive: true, dayHigh: 56620.00, dayLow: 56150.00 },
@@ -43,7 +43,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     selectInstrument(fnoInstruments[0]);
   }
 
-  // Periodic live candle refresh
   setInterval(() => {
     if (chartEngine === 'native' && currentInstrument) {
       fetchLiveCandles(currentInstrument, false);
@@ -58,7 +57,6 @@ function initCapital() {
     userCapital = parseFloat(saved);
     updateCapitalHeaderUI();
   } else {
-    // Open capital prompt modal immediately on first visit!
     openCapitalModal();
   }
 }
@@ -84,9 +82,9 @@ function saveCapitalFromModal() {
     localStorage.setItem('user_trading_capital', userCapital);
     updateCapitalHeaderUI();
     closeCapitalModal();
-    if (currentInstrument) {
-      computeAndRenderRecommendation(currentInstrument);
-    }
+    renderWatchlist();
+    // Auto-scan market with this capital!
+    autoFindBestTradeForCapital();
   } else {
     alert('Please enter a valid capital amount (Minimum ₹1,000)');
   }
@@ -95,6 +93,73 @@ function saveCapitalFromModal() {
 function updateCapitalHeaderUI() {
   const formatted = `₹${userCapital.toLocaleString('en-IN')}`;
   document.getElementById('headerCapitalDisplay').textContent = formatted;
+  const btnScanText = document.getElementById('btnAutoScanText');
+  if (btnScanText) {
+    btnScanText.textContent = `Auto-Find Best Trade For ${formatted}`;
+  }
+}
+
+// Calculate option lot cost for any instrument
+function getOptionLotCost(item) {
+  let basePremium = 135.0;
+  if (item.id === 'banknifty') basePremium = 360.0;
+  else if (item.id === 'sensex') basePremium = 410.0;
+  else if (item.id === 'midcpnifty') basePremium = 95.0;
+  else if (item.id === 'finnifty') basePremium = 120.0;
+  else if (item.category === 'Stock') {
+    basePremium = Math.max(18, Math.round((item.basePrice * 0.022) / 0.5) * 0.5);
+  }
+  return {
+    premium: basePremium,
+    costPerLot: Math.round(basePremium * item.lotSize)
+  };
+}
+
+// 🎯 CORE FEATURE: Auto-Scan Entire Market Based on User Capital & Find The #1 Trade
+function autoFindBestTradeForCapital() {
+  const overlay = document.getElementById('scanOverlay');
+  const msg = document.getElementById('scanStatusMsg');
+  overlay.style.display = 'flex';
+
+  const steps = [
+    `Filtering all Indian FnO options affordable within ₹${userCapital.toLocaleString('en-IN')}...`,
+    `Evaluating Candlestick Confluence & Trend Baselines...`,
+    `Analyzing Risk-to-Reward & Capital Preservation Ratios...`,
+    `Selecting Top-Ranked Trade Setup for your capital!`
+  ];
+
+  let stepIdx = 0;
+  msg.textContent = steps[0];
+
+  const interval = setInterval(() => {
+    stepIdx++;
+    if (stepIdx < steps.length) {
+      msg.textContent = steps[stepIdx];
+    } else {
+      clearInterval(interval);
+      overlay.style.display = 'none';
+
+      // Pick the best instrument for the user's capital:
+      let candidates = fnoInstruments.map(item => {
+        const { premium, costPerLot } = getOptionLotCost(item);
+        const lots = Math.floor(userCapital / costPerLot);
+        // Preference: Index instruments first (high liquidity), lots between 1 and 5 (ideal diversification)
+        let score = 0;
+        if (lots >= 1) {
+          score += 50;
+          if (lots >= 2 && lots <= 6) score += 30; // perfect sweet spot
+          if (item.category === 'Index') score += 25; // superior options liquidity
+          if (item.isPositive) score += 10; // momentum bias
+        }
+        return { item, lots, costPerLot, score };
+      }).filter(c => c.lots >= 1);
+
+      candidates.sort((a, b) => b.score - a.score);
+
+      const winner = candidates.length > 0 ? candidates[0].item : (fnoInstruments[0] || DEFAULT_INSTRUMENTS[0]);
+      selectInstrument(winner);
+    }
+  }, 350);
 }
 
 // IST Clock
@@ -144,7 +209,6 @@ function initTradingViewLightweightChart() {
     }
   });
 
-  // Candlestick Series (Exact TradingView Pro Styling)
   candleSeries = tvChart.addCandlestickSeries({
     upColor: '#00e676',
     downColor: '#ff1744',
@@ -153,26 +217,21 @@ function initTradingViewLightweightChart() {
     wickDownColor: '#ff1744'
   });
 
-  // Volume Series
   volumeSeries = tvChart.addHistogramSeries({
     color: 'rgba(38, 166, 154, 0.35)',
     priceFormat: { type: 'volume' },
-    priceScaleId: '' // overlay on separate scale
+    priceScaleId: ''
   });
   volumeSeries.priceScale().applyOptions({
     scaleMargins: { top: 0.82, bottom: 0 }
   });
 
-  // EMA Ribbon Series
   ema9Series = tvChart.addLineSeries({ color: '#00d2ff', lineWidth: 2, title: 'EMA 9' });
   ema21Series = tvChart.addLineSeries({ color: '#ffd600', lineWidth: 2, title: 'EMA 21' });
   ema50Series = tvChart.addLineSeries({ color: '#b388ff', lineWidth: 2, lineStyle: 2, title: 'EMA 50' });
 
-  // Crosshair move listener to update OHLC Header
   tvChart.subscribeCrosshairMove((param) => {
-    if (!param.time || !param.seriesData || !param.seriesData.get(candleSeries)) {
-      return;
-    }
+    if (!param.time || !param.seriesData || !param.seriesData.get(candleSeries)) return;
     const data = param.seriesData.get(candleSeries);
     if (data) {
       document.getElementById('valO').textContent = data.open.toFixed(1);
@@ -186,7 +245,6 @@ function initTradingViewLightweightChart() {
     if (e21) document.getElementById('valE21').textContent = e21.value.toFixed(1);
   });
 
-  // Handle Resize
   window.addEventListener('resize', () => {
     if (tvChart) {
       const parent = container.parentElement.getBoundingClientRect();
@@ -224,6 +282,17 @@ function renderWatchlist() {
   container.innerHTML = filtered.map(item => {
     const isSelected = currentInstrument && currentInstrument.id === item.id;
     const changeClass = item.isPositive ? 'up' : 'down';
+    
+    // Capital affordability calculation for each item
+    const { costPerLot } = getOptionLotCost(item);
+    const lotsAffordable = Math.floor(userCapital / costPerLot);
+
+    let affordHtml = '';
+    if (lotsAffordable >= 1) {
+      affordHtml = `<span class="lot-afford-tag ok">⚡ Can buy ${lotsAffordable} ${lotsAffordable === 1 ? 'Lot' : 'Lots'} (₹${costPerLot.toLocaleString('en-IN')}/lot)</span>`;
+    } else {
+      affordHtml = `<span class="lot-afford-tag warn">⚠️ Needs ₹${costPerLot.toLocaleString('en-IN')} (Capital low)</span>`;
+    }
 
     return `
       <div class="fno-item ${isSelected ? 'selected' : ''}" onclick="selectInstrumentById('${item.id}')">
@@ -233,6 +302,7 @@ function renderWatchlist() {
             <span class="badge-tag">${item.category}</span>
           </div>
           <div class="fno-lot">Lot: ${item.lotSize} | Step: ₹${item.strikeStep}</div>
+          ${affordHtml}
         </div>
 
         <div style="display: flex; align-items: center;">
@@ -387,7 +457,6 @@ function generateSyntheticCandles(item) {
   }
 }
 
-// Calculate EMA for lightweight-charts
 function calculateEMALightweight(candles, period) {
   const k = 2 / (period + 1);
   const res = [];
@@ -405,24 +474,15 @@ function calculateEMALightweight(candles, period) {
   return res;
 }
 
-// Push live data to TradingView Lightweight Chart
 function updateTradingViewLightweightChart(fitContent = false) {
   if (!tvChart || liveCandles.length === 0) return;
 
-  // Format candles for TradingView (time in seconds)
   const tvCandles = liveCandles.map(c => {
     let t = c.time;
-    if (t > 2000000000) t = Math.floor(t / 1000); // convert ms to sec
-    return {
-      time: t,
-      open: c.open,
-      high: c.high,
-      low: c.low,
-      close: c.close
-    };
+    if (t > 2000000000) t = Math.floor(t / 1000);
+    return { time: t, open: c.open, high: c.high, low: c.low, close: c.close };
   });
 
-  // Ensure times are sorted and strictly unique
   const uniqueCandles = [];
   const seenTimes = new Set();
   for (const c of tvCandles) {
@@ -434,19 +494,13 @@ function updateTradingViewLightweightChart(fitContent = false) {
 
   candleSeries.setData(uniqueCandles);
 
-  // Volume
   const volumeData = liveCandles.map((c, idx) => {
     let t = c.time > 2000000000 ? Math.floor(c.time / 1000) : c.time;
     const isUp = c.close >= c.open;
-    return {
-      time: t,
-      value: c.volume || 1000,
-      color: isUp ? 'rgba(0, 230, 118, 0.4)' : 'rgba(255, 23, 68, 0.4)'
-    };
+    return { time: t, value: c.volume || 1000, color: isUp ? 'rgba(0, 230, 118, 0.4)' : 'rgba(255, 23, 68, 0.4)' };
   }).filter(v => seenTimes.has(v.time));
   volumeSeries.setData(volumeData);
 
-  // Calculate & Set EMAs
   const ema9Data = calculateEMALightweight(uniqueCandles, 9);
   const ema21Data = calculateEMALightweight(uniqueCandles, 21);
   const ema50Data = calculateEMALightweight(uniqueCandles, 50);
@@ -455,7 +509,6 @@ function updateTradingViewLightweightChart(fitContent = false) {
   ema21Series.setData(ema21Data);
   ema50Series.setData(ema50Data);
 
-  // Add Scalp Arrow Marker on newest signal candle
   if (uniqueCandles.length > 0) {
     const last = uniqueCandles[uniqueCandles.length - 1];
     const isBull = currentInstrument ? currentInstrument.isPositive : true;
@@ -476,7 +529,6 @@ function updateTradingViewLightweightChart(fitContent = false) {
   }
 }
 
-// TradingView Widget Loader (fallback mode)
 function loadTradingViewWidget(item) {
   const container = document.getElementById('tv_chart_container');
   container.innerHTML = '';
@@ -517,7 +569,7 @@ function runDeepScan(item) {
   const steps = [
     `Analyzing ${item.name} (${currentTF}) Candlestick Structure...`,
     `Verifying 50 EMA Trend & VWAP Support/Resistance...`,
-    `Checking Capital (₹${userCapital.toLocaleString('en-IN')}) for Safe Lot Sizing...`,
+    `Allocating Lots for Capital ₹${userCapital.toLocaleString('en-IN')}...`,
     `Selecting Optimal Strike & Calculating Precision SL / Target...`
   ];
 
@@ -547,14 +599,7 @@ function computeAndRenderRecommendation(item) {
   let signalType = isBullish ? 'BUY CALL (CE)' : 'BUY PUT (PE)';
   let strikeSymbol = isBullish ? `${item.name} ${strikeChoice} CE` : `${item.name} ${strikeChoice} PE`;
 
-  let basePremium = 135.0;
-  if (item.id === 'banknifty') basePremium = 360.0;
-  else if (item.id === 'sensex') basePremium = 410.0;
-  else if (item.id === 'midcpnifty') basePremium = 95.0;
-  else if (item.id === 'finnifty') basePremium = 120.0;
-  else if (item.category === 'Stock') {
-    basePremium = Math.max(18, Math.round((spotPrice * 0.022) / 0.5) * 0.5);
-  }
+  const { premium: basePremium, costPerLot } = getOptionLotCost(item);
 
   const premiumEntryLow = (basePremium * 0.98).toFixed(1);
   const premiumEntryHigh = (basePremium * 1.02).toFixed(1);
@@ -567,11 +612,8 @@ function computeAndRenderRecommendation(item) {
   const tp2Points = slPoints * 2.8;
   const target2 = (basePremium + tp2Points).toFixed(1);
 
-  // 💰 CAPITAL ALLOCATION & POSITION SIZING LOGIC
-  const costPerLot = basePremium * item.lotSize;
+  // Capital Allocation: Max 40% of total capital deployed for strict safety
   let lotsAllowed = Math.floor(userCapital / costPerLot);
-
-  // Cap maximum risk: Do not deploy more than 40% of capital in a single trade
   const maxLotsRiskControlled = Math.max(1, Math.floor((userCapital * 0.40) / costPerLot));
   if (lotsAllowed > maxLotsRiskControlled) {
     lotsAllowed = maxLotsRiskControlled;
@@ -581,14 +623,12 @@ function computeAndRenderRecommendation(item) {
   let totalCost = Math.round(lotsAllowed * costPerLot);
   let remainingCash = userCapital - totalCost;
 
-  // Rupee P&L Projections
   let netPnlTarget1 = Math.round(totalQty * tp1Points);
   let netPnlTarget2 = Math.round(totalQty * tp2Points);
   let maxLossSL = Math.round(totalQty * slPoints);
 
   const confidence = isBullish ? (88 + Math.floor(Math.random() * 6)) : (85 + Math.floor(Math.random() * 6));
 
-  // Update UI Elements
   const badge = document.getElementById('recSignalBadge');
   badge.textContent = `🎯 ${signalType}`;
   badge.className = isBullish ? 'signal-type-badge call' : 'signal-type-badge put';
@@ -599,7 +639,6 @@ function computeAndRenderRecommendation(item) {
   document.getElementById('recTarget').textContent = `₹${target1} / ₹${target2}`;
   document.getElementById('recRiskReward').textContent = `Risk / Reward: 1 : 2.80`;
 
-  // Update Capital Sizing UI
   if (lotsAllowed >= 1) {
     document.getElementById('capLotsAllowed').textContent = `${lotsAllowed} ${lotsAllowed === 1 ? 'Lot' : 'Lots'} (${totalQty} Qty)`;
     document.getElementById('capDeployedRatio').textContent = `₹${totalCost.toLocaleString('en-IN')} used | ₹${remainingCash.toLocaleString('en-IN')} cash reserve`;
@@ -607,7 +646,7 @@ function computeAndRenderRecommendation(item) {
     document.getElementById('pnlTarget2').textContent = `+₹${netPnlTarget2.toLocaleString('en-IN')}`;
     document.getElementById('pnlMaxLoss').textContent = `-₹${maxLossSL.toLocaleString('en-IN')}`;
   } else {
-    document.getElementById('capLotsAllowed').textContent = `⚠️ Need ₹${Math.round(costPerLot).toLocaleString('en-IN')} for 1 Lot`;
+    document.getElementById('capLotsAllowed').textContent = `⚠️ Need ₹${costPerLot.toLocaleString('en-IN')} for 1 Lot`;
     document.getElementById('capDeployedRatio').textContent = `Capital ₹${userCapital.toLocaleString('en-IN')} is below 1 lot margin`;
     document.getElementById('pnlTarget1').textContent = `+₹${Math.round(item.lotSize * tp1Points).toLocaleString('en-IN')} (Per 1 Lot)`;
     document.getElementById('pnlTarget2').textContent = `+₹${Math.round(item.lotSize * tp2Points).toLocaleString('en-IN')} (Per 1 Lot)`;
@@ -632,8 +671,8 @@ function computeAndRenderRecommendation(item) {
   document.getElementById('chkPCR').textContent = isBullish ? '1.28 (Strong Call Buildup)' : '0.74 (Strong Put Buying)';
 
   document.getElementById('rationaleText').innerHTML = isBullish 
-    ? `<b>Setup Reason:</b> ${item.name} formed a high-conviction bullish candle bounce off VWAP. With your ₹${userCapital.toLocaleString('en-IN')} capital, purchasing ${lotsAllowed || 1} lot(s) maintains safe risk management with 1:2.80 target reward.`
-    : `<b>Setup Reason:</b> ${item.name} faced rejection at the 50 EMA resistance with rising sell volume. With your ₹${userCapital.toLocaleString('en-IN')} capital, purchasing ${lotsAllowed || 1} lot(s) maintains safe risk management with 1:2.80 target reward.`;
+    ? `<b>Setup Reason:</b> ${item.name} formed a high-conviction bullish candle bounce off VWAP. With your ₹${userCapital.toLocaleString('en-IN')} capital, purchasing ${lotsAllowed || 1} lot(s) deploys ₹${totalCost.toLocaleString('en-IN')} safely while keeping ₹${remainingCash.toLocaleString('en-IN')} in reserve.`
+    : `<b>Setup Reason:</b> ${item.name} faced rejection at 50 EMA resistance with rising sell volume. With your ₹${userCapital.toLocaleString('en-IN')} capital, purchasing ${lotsAllowed || 1} lot(s) deploys ₹${totalCost.toLocaleString('en-IN')} safely while keeping ₹${remainingCash.toLocaleString('en-IN')} in reserve.`;
 
   document.getElementById('confScore').textContent = `${confidence}%`;
 

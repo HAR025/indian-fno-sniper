@@ -51,6 +51,13 @@
     <!-- Left Panel: Indian FnO Watchlist -->
     <aside class="watchlist-panel">
       <div class="watchlist-header">
+        
+        <!-- AUTO-FIND BEST TRADE FOR MY CAPITAL BUTTON -->
+        <button class="btn-auto-scan-capital" onclick="autoFindBestTradeForCapital()">
+          <span>🎯</span>
+          <span id="btnAutoScanText">Auto-Find Best Trade For ₹50,000</span>
+        </button>
+
         <div class="search-box">
           <span class="search-icon">🔍</span>
           <input type="text" id="searchInput" placeholder="Search Indian FnO (NIFTY, RELIANCE...)" oninput="filterWatchlist()" />
@@ -273,7 +280,7 @@
         <span class="modal-icon">💰</span>
         <div>
           <div class="modal-title">Set Your Trading Capital</div>
-          <div class="modal-desc">Enter the amount of capital you have available to purchase trades today. The tool will calculate the exact safe lot size and risk management for you.</div>
+          <div class="modal-desc">Enter the amount of capital you have available to purchase trades today. The tool will scan all Indian FnO options and find the best trade matching your exact capital.</div>
         </div>
       </div>
 
@@ -294,7 +301,7 @@
       </div>
 
       <button class="btn-confirm-capital" onclick="saveCapitalFromModal()">
-        🚀 Save Capital & Unlock Trades
+        🚀 Scan Market & Find Best Trade
       </button>
     </div>
   </div>

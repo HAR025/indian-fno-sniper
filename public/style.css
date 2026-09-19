@@ -175,7 +175,7 @@ header {
 
 /* Left Sidebar - Indian FnO Watchlist */
 .watchlist-panel {
-  width: 380px;
+  width: 390px;
   background: var(--bg-panel);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -184,13 +184,40 @@ header {
 }
 
 .watchlist-header {
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Auto-Find Best Trade For My Capital Banner */
+.btn-auto-scan-capital {
+  background: linear-gradient(135deg, #ffd600, #00e676);
+  color: #000;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 900;
+  padding: 9px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(255, 214, 0, 0.25);
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.btn-auto-scan-capital:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 230, 118, 0.45);
+  background: linear-gradient(135deg, #00e676, #ffd600);
 }
 
 .search-box {
   position: relative;
-  margin-bottom: 8px;
 }
 
 .search-box input {
@@ -247,7 +274,7 @@ header {
 }
 
 .fno-item {
-  padding: 11px 14px;
+  padding: 10px 12px;
   border-bottom: 1px solid rgba(36, 45, 64, 0.6);
   display: flex;
   align-items: center;
@@ -267,13 +294,13 @@ header {
 .fno-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .fno-name-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .fno-symbol {
@@ -283,30 +310,33 @@ header {
 }
 
 .badge-tag {
-  font-size: 0.65rem;
-  padding: 1px 5px;
+  font-size: 0.62rem;
+  padding: 1px 4px;
   border-radius: 3px;
   background: var(--bg-hover);
   color: var(--text-muted);
 }
 
-.fno-lot {
-  font-size: 0.72rem;
-  color: var(--text-dim);
+.lot-afford-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
 }
+.lot-afford-tag.ok { color: var(--green); }
+.lot-afford-tag.warn { color: var(--gold); }
+.lot-afford-tag.no { color: var(--text-dim); }
 
 .fno-price-col {
   text-align: right;
-  margin-right: 10px;
+  margin-right: 8px;
 }
 
 .fno-price {
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
 }
 
 .fno-change {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
@@ -319,13 +349,13 @@ header {
   color: #000;
   border: none;
   font-weight: 800;
-  font-size: 0.75rem;
-  padding: 6px 11px;
+  font-size: 0.74rem;
+  padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 210, 255, 0.3);
   white-space: nowrap;
@@ -692,21 +722,9 @@ header {
   gap: 10px;
 }
 
-.modal-icon {
-  font-size: 1.6rem;
-}
-
-.modal-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #fff;
-}
-
-.modal-desc {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  line-height: 1.45;
-}
+.modal-icon { font-size: 1.6rem; }
+.modal-title { font-size: 1.25rem; font-weight: 800; color: #fff; }
+.modal-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.45; }
 
 .capital-input-wrap {
   position: relative;
@@ -809,9 +827,7 @@ header {
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .scan-msg {
   font-size: 0.95rem;
