@@ -21,19 +21,36 @@ let ema50Series = null;
 
 // Complete Indian FnO Database (Exact Official Friday NSE/BSE Close Rates)
 const DEFAULT_INSTRUMENTS = [
-  { id: 'nifty', name: 'NIFTY 50', symbol: 'NSE:NIFTY', tvSymbol: 'CAPITALCOM:NIFTY50', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:NIFTY', yfSymbol: '^NSEI', category: 'Index', basePrice: 23346.40, lotSize: 25, strikeStep: 50, change: '+0.33%', isPositive: true, dayHigh: 23389.15, dayLow: 23286.60 },
-  { id: 'banknifty', name: 'BANK NIFTY', symbol: 'NSE:BANKNIFTY', tvSymbol: 'CAPITALCOM:BANKNIFTY', etfSymbol: 'NSE:BANKBEES', officialSymbol: 'NSE:BANKNIFTY', yfSymbol: '^NSEBANK', category: 'Index', basePrice: 56358.70, lotSize: 15, strikeStep: 100, change: '+0.54%', isPositive: true, dayHigh: 56497.45, dayLow: 56073.55 },
+  { id: 'nifty', name: 'NIFTY 50', symbol: 'NSE:NIFTY', tvSymbol: 'NSE:NIFTY', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:NIFTY', yfSymbol: '^NSEI', category: 'Index', basePrice: 23346.40, lotSize: 25, strikeStep: 50, change: '+0.33%', isPositive: true, dayHigh: 23389.15, dayLow: 23286.60 },
+  { id: 'banknifty', name: 'BANK NIFTY', symbol: 'NSE:BANKNIFTY', tvSymbol: 'NSE:BANKNIFTY', etfSymbol: 'NSE:BANKBEES', officialSymbol: 'NSE:BANKNIFTY', yfSymbol: '^NSEBANK', category: 'Index', basePrice: 56358.70, lotSize: 15, strikeStep: 100, change: '+0.54%', isPositive: true, dayHigh: 56497.45, dayLow: 56073.55 },
   { id: 'sensex', name: 'BSE SENSEX', symbol: 'BSE:SENSEX', tvSymbol: 'BSE:SENSEX', etfSymbol: 'BSE:SENSEX', officialSymbol: 'BSE:SENSEX', yfSymbol: '^BSESN', category: 'Index', basePrice: 74294.96, lotSize: 10, strikeStep: 100, change: '-0.06%', isPositive: false, dayHigh: 74728.44, dayLow: 74294.96 },
-  { id: 'finnifty', name: 'FIN NIFTY', symbol: 'NSE:FINNIFTY', tvSymbol: 'CAPITALCOM:FINNIFTY', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:FINNIFTY', yfSymbol: 'NIFTY_FIN_SERVICE.NS', category: 'Index', basePrice: 25510.00, lotSize: 25, strikeStep: 50, change: '+0.76%', isPositive: true, dayHigh: 25576.60, dayLow: 25365.00 },
-  { id: 'reliance', name: 'RELIANCE', symbol: 'BSE:RELIANCE', tvSymbol: 'BSE:RELIANCE', etfSymbol: 'NSE:RELIANCE', officialSymbol: 'NSE:RELIANCE', yfSymbol: 'RELIANCE.NS', category: 'Stock', basePrice: 1226.40, lotSize: 250, strikeStep: 20, change: '-1.41%', isPositive: false, dayHigh: 1247.30, dayLow: 1226.40 },
-  { id: 'hdfcbank', name: 'HDFC BANK', symbol: 'BSE:HDFCBANK', tvSymbol: 'BSE:HDFCBANK', etfSymbol: 'NSE:HDFCBANK', officialSymbol: 'NSE:HDFCBANK', yfSymbol: 'HDFCBANK.NS', category: 'Stock', basePrice: 731.00, lotSize: 550, strikeStep: 10, change: '+2.52%', isPositive: true, dayHigh: 733.80, dayLow: 715.25 },
-  { id: 'icicibank', name: 'ICICI BANK', symbol: 'BSE:ICICIBANK', tvSymbol: 'BSE:ICICIBANK', etfSymbol: 'NSE:ICICIBANK', officialSymbol: 'NSE:ICICIBANK', yfSymbol: 'ICICIBANK.NS', category: 'Stock', basePrice: 1338.90, lotSize: 700, strikeStep: 10, change: '-0.65%', isPositive: false, dayHigh: 1359.80, dayLow: 1338.90 },
-  { id: 'tcs', name: 'TCS', symbol: 'BSE:TCS', tvSymbol: 'BSE:TCS', etfSymbol: 'NSE:TCS', officialSymbol: 'NSE:TCS', yfSymbol: 'TCS.NS', category: 'Stock', basePrice: 2105.00, lotSize: 175, strikeStep: 50, change: '-3.88%', isPositive: false, dayHigh: 2177.30, dayLow: 2101.20 },
-  { id: 'infy', name: 'INFOSYS', symbol: 'BSE:INFY', tvSymbol: 'BSE:INFY', etfSymbol: 'NSE:INFY', officialSymbol: 'NSE:INFY', yfSymbol: 'INFY.NS', category: 'Stock', basePrice: 1051.40, lotSize: 400, strikeStep: 20, change: '-0.68%', isPositive: false, dayHigh: 1061.90, dayLow: 1038.00 },
-  { id: 'sbin', name: 'SBI (SBIN)', symbol: 'BSE:SBIN', tvSymbol: 'BSE:SBIN', etfSymbol: 'NSE:SBIN', officialSymbol: 'NSE:SBIN', yfSymbol: 'SBIN.NS', category: 'Stock', basePrice: 996.20, lotSize: 1500, strikeStep: 5, change: '+0.76%', isPositive: true, dayHigh: 996.20, dayLow: 985.10 },
-  { id: 'bajfinance', name: 'BAJAJ FINANCE', symbol: 'BSE:BAJFINANCE', tvSymbol: 'BSE:BAJFINANCE', etfSymbol: 'NSE:BAJFINANCE', officialSymbol: 'NSE:BAJFINANCE', yfSymbol: 'BAJFINANCE.NS', category: 'Stock', basePrice: 1040.30, lotSize: 125, strikeStep: 50, change: '+2.49%', isPositive: true, dayHigh: 1040.30, dayLow: 1019.10 },
-  { id: 'bhartiartl', name: 'BHARTI AIRTEL', symbol: 'BSE:BHARTIARTL', tvSymbol: 'BSE:BHARTIARTL', etfSymbol: 'NSE:BHARTIARTL', officialSymbol: 'NSE:BHARTIARTL', yfSymbol: 'BHARTIARTL.NS', category: 'Stock', basePrice: 1893.30, lotSize: 475, strikeStep: 10, change: '+3.12%', isPositive: true, dayHigh: 1893.30, dayLow: 1835.30 }
+  { id: 'finnifty', name: 'FIN NIFTY', symbol: 'NSE:FINNIFTY', tvSymbol: 'NSE:FINNIFTY', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:FINNIFTY', yfSymbol: 'NIFTY_FIN_SERVICE.NS', category: 'Index', basePrice: 25510.00, lotSize: 25, strikeStep: 50, change: '+0.76%', isPositive: true, dayHigh: 25576.60, dayLow: 25365.00 },
+  { id: 'reliance', name: 'RELIANCE', symbol: 'NSE:RELIANCE', tvSymbol: 'NSE:RELIANCE', etfSymbol: 'NSE:RELIANCE', officialSymbol: 'NSE:RELIANCE', yfSymbol: 'RELIANCE.NS', category: 'Stock', basePrice: 1226.40, lotSize: 250, strikeStep: 20, change: '-1.41%', isPositive: false, dayHigh: 1247.30, dayLow: 1226.40 },
+  { id: 'hdfcbank', name: 'HDFC BANK', symbol: 'NSE:HDFCBANK', tvSymbol: 'NSE:HDFCBANK', etfSymbol: 'NSE:HDFCBANK', officialSymbol: 'NSE:HDFCBANK', yfSymbol: 'HDFCBANK.NS', category: 'Stock', basePrice: 731.00, lotSize: 550, strikeStep: 10, change: '+2.52%', isPositive: true, dayHigh: 733.80, dayLow: 715.25 },
+  { id: 'icicibank', name: 'ICICI BANK', symbol: 'NSE:ICICIBANK', tvSymbol: 'NSE:ICICIBANK', etfSymbol: 'NSE:ICICIBANK', officialSymbol: 'NSE:ICICIBANK', yfSymbol: 'ICICIBANK.NS', category: 'Stock', basePrice: 1338.90, lotSize: 700, strikeStep: 10, change: '-0.65%', isPositive: false, dayHigh: 1359.80, dayLow: 1338.90 },
+  { id: 'tcs', name: 'TCS', symbol: 'NSE:TCS', tvSymbol: 'NSE:TCS', etfSymbol: 'NSE:TCS', officialSymbol: 'NSE:TCS', yfSymbol: 'TCS.NS', category: 'Stock', basePrice: 2105.00, lotSize: 175, strikeStep: 50, change: '-3.88%', isPositive: false, dayHigh: 2177.30, dayLow: 2101.20 },
+  { id: 'infy', name: 'INFOSYS', symbol: 'NSE:INFY', tvSymbol: 'NSE:INFY', etfSymbol: 'NSE:INFY', officialSymbol: 'NSE:INFY', yfSymbol: 'INFY.NS', category: 'Stock', basePrice: 1051.40, lotSize: 400, strikeStep: 20, change: '-0.68%', isPositive: false, dayHigh: 1061.90, dayLow: 1038.00 },
+  { id: 'sbin', name: 'SBI (SBIN)', symbol: 'NSE:SBIN', tvSymbol: 'NSE:SBIN', etfSymbol: 'NSE:SBIN', officialSymbol: 'NSE:SBIN', yfSymbol: 'SBIN.NS', category: 'Stock', basePrice: 996.20, lotSize: 1500, strikeStep: 5, change: '+0.76%', isPositive: true, dayHigh: 996.20, dayLow: 985.10 },
+  { id: 'bajfinance', name: 'BAJAJ FINANCE', symbol: 'NSE:BAJFINANCE', tvSymbol: 'NSE:BAJFINANCE', etfSymbol: 'NSE:BAJFINANCE', officialSymbol: 'NSE:BAJFINANCE', yfSymbol: 'BAJFINANCE.NS', category: 'Stock', basePrice: 1040.30, lotSize: 125, strikeStep: 50, change: '+2.49%', isPositive: true, dayHigh: 1040.30, dayLow: 1019.10 },
+  { id: 'bhartiartl', name: 'BHARTI AIRTEL', symbol: 'NSE:BHARTIARTL', tvSymbol: 'NSE:BHARTIARTL', etfSymbol: 'NSE:BHARTIARTL', officialSymbol: 'NSE:BHARTIARTL', yfSymbol: 'BHARTIARTL.NS', category: 'Stock', basePrice: 1893.30, lotSize: 475, strikeStep: 10, change: '+3.12%', isPositive: true, dayHigh: 1893.30, dayLow: 1835.30 }
 ];
+
+let realCandlesCache = {};
+
+async function loadRealCandlesDatabase() {
+  try {
+    const res = await fetch('./candles_data.json');
+    if (res.ok) {
+      realCandlesCache = await res.json();
+      console.log('✅ Real exchange candles loaded from candles_data.json');
+      if (currentInstrument) {
+        loadCandlesForInstrument(currentInstrument, true);
+      }
+    }
+  } catch (e) {
+    console.warn('Real candles cache not available, using fallback model', e);
+  }
+}
 
 // Initialize Application
 window.addEventListener('DOMContentLoaded', async () => {
@@ -45,6 +62,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (fnoInstruments.length > 0) {
     selectInstrument(fnoInstruments[0]);
   }
+  loadRealCandlesDatabase();
 
   setInterval(() => {
     if (chartEngine === 'native' && currentInstrument) {
@@ -629,9 +647,16 @@ function loadChart() {
 
 function loadCandlesForInstrument(item, fitContent = false) {
   liveCandles = [];
+
+  // Priority 1: Exact official exchange candles from live apps (TradingView / Kite)
+  if (realCandlesCache && realCandlesCache[item.id] && realCandlesCache[item.id][currentTF] && realCandlesCache[item.id][currentTF].length > 0) {
+    liveCandles = realCandlesCache[item.id][currentTF].map(c => ({ ...c }));
+    updateTradingViewLightweightChart(fitContent);
+    return;
+  }
+
+  // Priority 2: Mathematical model anchored to official Friday closing rate
   const status = getIndianMarketStatus();
-  
-  // When market is closed (weekend or after-hours), anchor timestamps to Friday 15:30 IST
   let endSec;
   if (!status.isOpen) {
     const now = new Date();
@@ -651,7 +676,6 @@ function loadCandlesForInstrument(item, fitContent = false) {
   liveCandles = new Array(count);
   let currClose = item.basePrice;
 
-  // Build backward from official closing price to guarantee last candle matches exact Friday close
   for (let i = count - 1; i >= 0; i--) {
     let t = endSec - (count - 1 - i) * tfSec;
     if (i === count - 1) {
@@ -735,6 +759,8 @@ function updateTradingViewLightweightChart(fitContent = false) {
     return { time: t, open: c.open, high: c.high, low: c.low, close: c.close };
   });
 
+  tvCandles.sort((a, b) => a.time - b.time);
+
   const uniqueCandles = [];
   const seenTimes = new Set();
   for (const c of tvCandles) {
@@ -751,6 +777,7 @@ function updateTradingViewLightweightChart(fitContent = false) {
     const isUp = c.close >= c.open;
     return { time: t, value: c.volume || 1000, color: isUp ? 'rgba(0, 230, 118, 0.4)' : 'rgba(255, 23, 68, 0.4)' };
   }).filter(v => seenTimes.has(v.time));
+  volumeData.sort((a, b) => a.time - b.time);
   volumeSeries.setData(volumeData);
 
   const ema9Data = calculateEMALightweight(uniqueCandles, 9);
@@ -764,6 +791,13 @@ function updateTradingViewLightweightChart(fitContent = false) {
   if (uniqueCandles.length > 0) {
     const last = uniqueCandles[uniqueCandles.length - 1];
     const isBull = currentInstrument ? currentInstrument.isPositive : true;
+
+    document.getElementById('valO').textContent = last.open.toFixed(1);
+    document.getElementById('valH').textContent = last.high.toFixed(1);
+    document.getElementById('valL').textContent = last.low.toFixed(1);
+    document.getElementById('valC').textContent = last.close.toFixed(1);
+    if (ema9Data.length > 0) document.getElementById('valE9').textContent = ema9Data[ema9Data.length - 1].value.toFixed(1);
+    if (ema21Data.length > 0) document.getElementById('valE21').textContent = ema21Data[ema21Data.length - 1].value.toFixed(1);
 
     candleSeries.setMarkers([
       {
