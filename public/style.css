@@ -151,6 +151,10 @@ header {
   font-weight: 600;
 }
 
+.live-indicator.closed {
+  color: #ff5252;
+}
+
 .pulse-dot {
   width: 8px;
   height: 8px;
@@ -158,6 +162,12 @@ header {
   border-radius: 50%;
   box-shadow: 0 0 8px var(--green);
   animation: pulse 1.8s infinite;
+}
+
+.live-indicator.closed .pulse-dot {
+  background: #ff5252;
+  box-shadow: 0 0 6px rgba(255, 82, 82, 0.7);
+  animation: none;
 }
 
 @keyframes pulse {

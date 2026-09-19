@@ -35,9 +35,9 @@
     </div>
 
     <div class="header-status">
-      <div class="live-indicator">
+      <div class="live-indicator" id="marketStatusIndicator">
         <span class="pulse-dot"></span>
-        <span>NSE / BSE LIVE FEED</span>
+        <span id="marketStatusText">NSE / BSE LIVE FEED</span>
       </div>
       <div id="istClock" style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">
         IST: Loading...
@@ -82,8 +82,8 @@
       <div class="terminal-toolbar">
         <div class="active-instrument-meta">
           <div class="active-name" id="activeName">NIFTY 50</div>
-          <div class="active-price-pill" id="activePricePill">₹23,346.40 (+0.68%)</div>
-          <div style="font-size: 0.78rem; color: var(--text-muted);" id="activeRange">H: ₹23,450.00 | L: ₹23,280.20</div>
+          <div class="active-price-pill up" id="activePricePill">₹23,346.40 (+0.33%)</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);" id="activeRange">H: ₹23,389.15 | L: ₹23,286.60</div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">

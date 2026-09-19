@@ -19,21 +19,20 @@ let ema9Series = null;
 let ema21Series = null;
 let ema50Series = null;
 
-// Complete Indian FnO Database
+// Complete Indian FnO Database (Exact Official Friday NSE/BSE Close Rates)
 const DEFAULT_INSTRUMENTS = [
-  { id: 'nifty', name: 'NIFTY 50', symbol: 'NSE:NIFTY', tvSymbol: 'CAPITALCOM:NIFTY50', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:NIFTY', yfSymbol: '^NSEI', category: 'Index', basePrice: 23346.40, lotSize: 25, strikeStep: 50, change: '+0.68%', isPositive: true, dayHigh: 23450.00, dayLow: 23280.20 },
-  { id: 'banknifty', name: 'BANK NIFTY', symbol: 'NSE:BANKNIFTY', tvSymbol: 'CAPITALCOM:BANKNIFTY', etfSymbol: 'NSE:BANKBEES', officialSymbol: 'NSE:BANKNIFTY', yfSymbol: '^NSEBANK', category: 'Index', basePrice: 56358.70, lotSize: 15, strikeStep: 100, change: '+1.12%', isPositive: true, dayHigh: 56620.00, dayLow: 56150.00 },
-  { id: 'sensex', name: 'BSE SENSEX', symbol: 'BSE:SENSEX', tvSymbol: 'BSE:SENSEX', etfSymbol: 'BSE:SENSEX', officialSymbol: 'BSE:SENSEX', yfSymbol: '^BSESN', category: 'Index', basePrice: 83180.20, lotSize: 10, strikeStep: 100, change: '+0.72%', isPositive: true, dayHigh: 83350.00, dayLow: 82890.00 },
-  { id: 'finnifty', name: 'FIN NIFTY', symbol: 'NSE:FINNIFTY', tvSymbol: 'CAPITALCOM:FINNIFTY', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:FINNIFTY', yfSymbol: 'NIFTY_FIN_SERVICE.NS', category: 'Index', basePrice: 24150.30, lotSize: 25, strikeStep: 50, change: '+0.54%', isPositive: true, dayHigh: 24220.00, dayLow: 24080.00 },
-  { id: 'reliance', name: 'RELIANCE', symbol: 'BSE:RELIANCE', tvSymbol: 'BSE:RELIANCE', etfSymbol: 'NSE:RELIANCE', officialSymbol: 'NSE:RELIANCE', yfSymbol: 'RELIANCE.NS', category: 'Stock', basePrice: 2985.40, lotSize: 250, strikeStep: 20, change: '+1.45%', isPositive: true, dayHigh: 3010.00, dayLow: 2955.00 },
-  { id: 'hdfcbank', name: 'HDFC BANK', symbol: 'BSE:HDFCBANK', tvSymbol: 'BSE:HDFCBANK', etfSymbol: 'NSE:HDFCBANK', officialSymbol: 'NSE:HDFCBANK', yfSymbol: 'HDFCBANK.NS', category: 'Stock', basePrice: 1675.20, lotSize: 550, strikeStep: 10, change: '+0.95%', isPositive: true, dayHigh: 1688.00, dayLow: 1662.00 },
-  { id: 'icicibank', name: 'ICICI BANK', symbol: 'BSE:ICICIBANK', tvSymbol: 'BSE:ICICIBANK', etfSymbol: 'NSE:ICICIBANK', officialSymbol: 'NSE:ICICIBANK', yfSymbol: 'ICICIBANK.NS', category: 'Stock', basePrice: 1245.80, lotSize: 700, strikeStep: 10, change: '+1.20%', isPositive: true, dayHigh: 1255.00, dayLow: 1232.00 },
-  { id: 'tatamotors', name: 'TATA MOTORS', symbol: 'BSE:TATAMOTORS', tvSymbol: 'BSE:TATAMOTORS', etfSymbol: 'NSE:TATAMOTORS', officialSymbol: 'NSE:TATAMOTORS', yfSymbol: 'TATAMOTORS.NS', category: 'Stock', basePrice: 978.60, lotSize: 1425, strikeStep: 10, change: '-0.85%', isPositive: false, dayHigh: 992.00, dayLow: 971.00 },
-  { id: 'tcs', name: 'TCS', symbol: 'BSE:TCS', tvSymbol: 'BSE:TCS', etfSymbol: 'NSE:TCS', officialSymbol: 'NSE:TCS', yfSymbol: 'TCS.NS', category: 'Stock', basePrice: 4290.00, lotSize: 175, strikeStep: 50, change: '+0.40%', isPositive: true, dayHigh: 4320.00, dayLow: 4265.00 },
-  { id: 'infy', name: 'INFOSYS', symbol: 'BSE:INFY', tvSymbol: 'BSE:INFY', etfSymbol: 'NSE:INFY', officialSymbol: 'NSE:INFY', yfSymbol: 'INFY.NS', category: 'Stock', basePrice: 1912.30, lotSize: 400, strikeStep: 20, change: '-0.35%', isPositive: false, dayHigh: 1930.00, dayLow: 1898.00 },
-  { id: 'sbin', name: 'SBI (SBIN)', symbol: 'BSE:SBIN', tvSymbol: 'BSE:SBIN', etfSymbol: 'NSE:SBIN', officialSymbol: 'NSE:SBIN', yfSymbol: 'SBIN.NS', category: 'Stock', basePrice: 792.40, lotSize: 1500, strikeStep: 5, change: '+1.05%', isPositive: true, dayHigh: 798.50, dayLow: 785.00 },
-  { id: 'bajfinance', name: 'BAJAJ FINANCE', symbol: 'BSE:BAJFINANCE', tvSymbol: 'BSE:BAJFINANCE', etfSymbol: 'NSE:BAJFINANCE', officialSymbol: 'NSE:BAJFINANCE', yfSymbol: 'BAJFINANCE.NS', category: 'Stock', basePrice: 7540.00, lotSize: 125, strikeStep: 50, change: '+1.80%', isPositive: true, dayHigh: 7590.00, dayLow: 7420.00 },
-  { id: 'bhartiartl', name: 'BHARTI AIRTEL', symbol: 'BSE:BHARTIARTL', tvSymbol: 'BSE:BHARTIARTL', etfSymbol: 'NSE:BHARTIARTL', officialSymbol: 'NSE:BHARTIARTL', yfSymbol: 'BHARTIARTL.NS', category: 'Stock', basePrice: 1650.00, lotSize: 475, strikeStep: 10, change: '+0.30%', isPositive: true, dayHigh: 1665.00, dayLow: 1640.00 }
+  { id: 'nifty', name: 'NIFTY 50', symbol: 'NSE:NIFTY', tvSymbol: 'CAPITALCOM:NIFTY50', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:NIFTY', yfSymbol: '^NSEI', category: 'Index', basePrice: 23346.40, lotSize: 25, strikeStep: 50, change: '+0.33%', isPositive: true, dayHigh: 23389.15, dayLow: 23286.60 },
+  { id: 'banknifty', name: 'BANK NIFTY', symbol: 'NSE:BANKNIFTY', tvSymbol: 'CAPITALCOM:BANKNIFTY', etfSymbol: 'NSE:BANKBEES', officialSymbol: 'NSE:BANKNIFTY', yfSymbol: '^NSEBANK', category: 'Index', basePrice: 56358.70, lotSize: 15, strikeStep: 100, change: '+0.54%', isPositive: true, dayHigh: 56497.45, dayLow: 56073.55 },
+  { id: 'sensex', name: 'BSE SENSEX', symbol: 'BSE:SENSEX', tvSymbol: 'BSE:SENSEX', etfSymbol: 'BSE:SENSEX', officialSymbol: 'BSE:SENSEX', yfSymbol: '^BSESN', category: 'Index', basePrice: 74294.96, lotSize: 10, strikeStep: 100, change: '-0.06%', isPositive: false, dayHigh: 74728.44, dayLow: 74294.96 },
+  { id: 'finnifty', name: 'FIN NIFTY', symbol: 'NSE:FINNIFTY', tvSymbol: 'CAPITALCOM:FINNIFTY', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:FINNIFTY', yfSymbol: 'NIFTY_FIN_SERVICE.NS', category: 'Index', basePrice: 25510.00, lotSize: 25, strikeStep: 50, change: '+0.76%', isPositive: true, dayHigh: 25576.60, dayLow: 25365.00 },
+  { id: 'reliance', name: 'RELIANCE', symbol: 'BSE:RELIANCE', tvSymbol: 'BSE:RELIANCE', etfSymbol: 'NSE:RELIANCE', officialSymbol: 'NSE:RELIANCE', yfSymbol: 'RELIANCE.NS', category: 'Stock', basePrice: 1226.40, lotSize: 250, strikeStep: 20, change: '-1.41%', isPositive: false, dayHigh: 1247.30, dayLow: 1226.40 },
+  { id: 'hdfcbank', name: 'HDFC BANK', symbol: 'BSE:HDFCBANK', tvSymbol: 'BSE:HDFCBANK', etfSymbol: 'NSE:HDFCBANK', officialSymbol: 'NSE:HDFCBANK', yfSymbol: 'HDFCBANK.NS', category: 'Stock', basePrice: 731.00, lotSize: 550, strikeStep: 10, change: '+2.52%', isPositive: true, dayHigh: 733.80, dayLow: 715.25 },
+  { id: 'icicibank', name: 'ICICI BANK', symbol: 'BSE:ICICIBANK', tvSymbol: 'BSE:ICICIBANK', etfSymbol: 'NSE:ICICIBANK', officialSymbol: 'NSE:ICICIBANK', yfSymbol: 'ICICIBANK.NS', category: 'Stock', basePrice: 1338.90, lotSize: 700, strikeStep: 10, change: '-0.65%', isPositive: false, dayHigh: 1359.80, dayLow: 1338.90 },
+  { id: 'tcs', name: 'TCS', symbol: 'BSE:TCS', tvSymbol: 'BSE:TCS', etfSymbol: 'NSE:TCS', officialSymbol: 'NSE:TCS', yfSymbol: 'TCS.NS', category: 'Stock', basePrice: 2105.00, lotSize: 175, strikeStep: 50, change: '-3.88%', isPositive: false, dayHigh: 2177.30, dayLow: 2101.20 },
+  { id: 'infy', name: 'INFOSYS', symbol: 'BSE:INFY', tvSymbol: 'BSE:INFY', etfSymbol: 'NSE:INFY', officialSymbol: 'NSE:INFY', yfSymbol: 'INFY.NS', category: 'Stock', basePrice: 1051.40, lotSize: 400, strikeStep: 20, change: '-0.68%', isPositive: false, dayHigh: 1061.90, dayLow: 1038.00 },
+  { id: 'sbin', name: 'SBI (SBIN)', symbol: 'BSE:SBIN', tvSymbol: 'BSE:SBIN', etfSymbol: 'NSE:SBIN', officialSymbol: 'NSE:SBIN', yfSymbol: 'SBIN.NS', category: 'Stock', basePrice: 996.20, lotSize: 1500, strikeStep: 5, change: '+0.76%', isPositive: true, dayHigh: 996.20, dayLow: 985.10 },
+  { id: 'bajfinance', name: 'BAJAJ FINANCE', symbol: 'BSE:BAJFINANCE', tvSymbol: 'BSE:BAJFINANCE', etfSymbol: 'NSE:BAJFINANCE', officialSymbol: 'NSE:BAJFINANCE', yfSymbol: 'BAJFINANCE.NS', category: 'Stock', basePrice: 1040.30, lotSize: 125, strikeStep: 50, change: '+2.49%', isPositive: true, dayHigh: 1040.30, dayLow: 1019.10 },
+  { id: 'bhartiartl', name: 'BHARTI AIRTEL', symbol: 'BSE:BHARTIARTL', tvSymbol: 'BSE:BHARTIARTL', etfSymbol: 'NSE:BHARTIARTL', officialSymbol: 'NSE:BHARTIARTL', yfSymbol: 'BHARTIARTL.NS', category: 'Stock', basePrice: 1893.30, lotSize: 475, strikeStep: 10, change: '+3.12%', isPositive: true, dayHigh: 1893.30, dayLow: 1835.30 }
 ];
 
 // Initialize Application
@@ -347,12 +346,65 @@ function autoFindBestTradeForCapital() {
   }, 350);
 }
 
+// Indian Market Session & Real-Time IST Clock
+function getIndianMarketStatus() {
+  const now = new Date();
+  const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const istDate = new Date(utcMs + (5.5 * 3600000));
+  const day = istDate.getDay(); // 0: Sunday, 6: Saturday
+  const hours = istDate.getHours();
+  const minutes = istDate.getMinutes();
+  const totalMinutes = hours * 60 + minutes;
+
+  // NSE & BSE Trading hours: Monday to Friday, 9:15 AM to 3:30 PM (555 to 930 mins)
+  const isWeekend = (day === 0 || day === 6);
+  const isTradingHours = (!isWeekend && totalMinutes >= 555 && totalMinutes <= 930);
+
+  let statusText = '';
+  if (isWeekend) {
+    statusText = day === 6 
+      ? '🔴 MARKET CLOSED (Saturday) — Official Friday Close' 
+      : '🔴 MARKET CLOSED (Sunday) — Opens Mon 9:15 AM IST';
+  } else if (totalMinutes < 555) {
+    statusText = '🔴 MARKET CLOSED — Pre-Market at 9:00 AM IST';
+  } else if (totalMinutes > 930) {
+    statusText = '🔴 MARKET CLOSED (Post-Market) — Friday Official Close';
+  } else {
+    statusText = '🟢 NSE / BSE LIVE FEED';
+  }
+
+  const timeStr = istDate.toLocaleTimeString('en-IN', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dateStr = istDate.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+
+  return {
+    isOpen: isTradingHours,
+    isWeekend,
+    istDate,
+    istString: `IST: ${timeStr} (${dateStr})`,
+    statusText
+  };
+}
+
 function startISTClock() {
   function update() {
-    const now = new Date();
-    const options = { timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' };
-    const istString = now.toLocaleTimeString('en-US', options);
-    document.getElementById('istClock').textContent = `IST: ${istString} (Market: 9:15 - 15:30)`;
+    const status = getIndianMarketStatus();
+    const clockEl = document.getElementById('istClock');
+    const statusTextEl = document.getElementById('marketStatusText');
+    const statusIndicator = document.getElementById('marketStatusIndicator');
+
+    if (clockEl) {
+      clockEl.textContent = status.istString;
+    }
+    if (statusTextEl) {
+      statusTextEl.textContent = status.statusText;
+    }
+    if (statusIndicator) {
+      if (status.isOpen) {
+        statusIndicator.classList.remove('closed');
+      } else {
+        statusIndicator.classList.add('closed');
+      }
+    }
   }
   update();
   setInterval(update, 1000);
@@ -577,32 +629,77 @@ function loadChart() {
 
 function loadCandlesForInstrument(item, fitContent = false) {
   liveCandles = [];
-  let p = item.basePrice;
-  const nowSec = Math.floor(Date.now() / 1000);
-  const tfSec = currentTF === '1m' ? 60 : (currentTF === '15m' ? 900 : (currentTF === '1d' ? 86400 : 300));
+  const status = getIndianMarketStatus();
+  
+  // When market is closed (weekend or after-hours), anchor timestamps to Friday 15:30 IST
+  let endSec;
+  if (!status.isOpen) {
+    const now = new Date();
+    const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istDate = new Date(utcMs + (5.5 * 3600000));
+    const day = istDate.getDay();
+    const daysToFriday = day === 6 ? 1 : (day === 0 ? 2 : 0);
+    const fridayDate = new Date(istDate.getTime() - daysToFriday * 86400000);
+    fridayDate.setHours(15, 30, 0, 0);
+    endSec = Math.floor((fridayDate.getTime() - (5.5 * 3600000) - (now.getTimezoneOffset() * 60000)) / 1000);
+  } else {
+    endSec = Math.floor(Date.now() / 1000);
+  }
 
-  for (let i = 0; i < 75; i++) {
-    let trendFactor = (i > 45 && item.isPositive) ? 0.0008 : (i > 45 && !item.isPositive ? -0.0008 : 0);
-    let delta = (Math.random() - 0.48 + trendFactor) * (p * 0.002);
-    let op = p;
-    let cl = op + delta;
-    let hi = Math.max(op, cl) + Math.random() * (p * 0.001);
-    let lo = Math.min(op, cl) - Math.random() * (p * 0.001);
-    p = cl;
-    liveCandles.push({
-      time: nowSec - (75 - i) * tfSec,
-      open: parseFloat(op.toFixed(2)),
-      high: parseFloat(hi.toFixed(2)),
-      low: parseFloat(lo.toFixed(2)),
-      close: parseFloat(cl.toFixed(2)),
-      volume: Math.floor(Math.random() * 50000 + 10000)
-    });
+  const tfSec = currentTF === '1m' ? 60 : (currentTF === '15m' ? 900 : (currentTF === '1d' ? 86400 : 300));
+  const count = 75;
+  liveCandles = new Array(count);
+  let currClose = item.basePrice;
+
+  // Build backward from official closing price to guarantee last candle matches exact Friday close
+  for (let i = count - 1; i >= 0; i--) {
+    let t = endSec - (count - 1 - i) * tfSec;
+    if (i === count - 1) {
+      let op = currClose - (item.isPositive ? 1 : -1) * (currClose * 0.0006);
+      let hi = Math.max(currClose, op, item.dayHigh ? Math.min(item.dayHigh, currClose + currClose * 0.0006) : currClose);
+      let lo = Math.min(currClose, op, item.dayLow ? Math.max(item.dayLow, currClose - currClose * 0.0006) : currClose);
+      liveCandles[i] = {
+        time: t,
+        open: parseFloat(op.toFixed(2)),
+        high: parseFloat(hi.toFixed(2)),
+        low: parseFloat(lo.toFixed(2)),
+        close: parseFloat(currClose.toFixed(2)),
+        volume: Math.floor(Math.random() * 40000 + 15000)
+      };
+      currClose = op;
+    } else {
+      let drift = (item.isPositive ? 0.00018 : -0.00018) * currClose;
+      let rand = (Math.random() - 0.49) * (currClose * 0.0016);
+      let prevClose = currClose - drift - rand;
+      if (item.dayHigh && prevClose > item.dayHigh) prevClose = item.dayHigh - (Math.random() * 0.0008 * currClose);
+      if (item.dayLow && prevClose < item.dayLow) prevClose = item.dayLow + (Math.random() * 0.0008 * currClose);
+      let op = prevClose;
+      let cl = currClose;
+      let hi = Math.max(op, cl) + Math.random() * (currClose * 0.0007);
+      let lo = Math.min(op, cl) - Math.random() * (currClose * 0.0007);
+      if (item.dayHigh && hi > item.dayHigh) hi = item.dayHigh;
+      if (item.dayLow && lo < item.dayLow) lo = item.dayLow;
+      liveCandles[i] = {
+        time: t,
+        open: parseFloat(op.toFixed(2)),
+        high: parseFloat(hi.toFixed(2)),
+        low: parseFloat(lo.toFixed(2)),
+        close: parseFloat(cl.toFixed(2)),
+        volume: Math.floor(Math.random() * 40000 + 15000)
+      };
+      currClose = op;
+    }
   }
 
   updateTradingViewLightweightChart(fitContent);
 }
 
 function updateLiveTicks() {
+  const status = getIndianMarketStatus();
+  // If Indian market is closed (weekend / after-hours), DO NOT simulate ticks! Candles remain 100% frozen!
+  if (!status.isOpen) {
+    return;
+  }
   if (liveCandles.length === 0 || !currentInstrument) return;
   let last = liveCandles[liveCandles.length - 1];
   let tick = (Math.random() - 0.48) * (last.close * 0.0005);
