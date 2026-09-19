@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indian FnO Sniper — Secret Trade Finder & Option Chain Scanner</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Official TradingView Lightweight Charts Library (Identical TradingView Engine) -->
+  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+  <!-- TradingView Official Advanced Library -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-title">
+          <span>Indian FnO Sniper Terminal</span>
+          <span class="secret-badge">🔒 Secret Personal Engine</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Capital Display Widget in Header -->
+    <div class="capital-header-badge" onclick="openCapitalModal()" title="Click to adjust your trading capital">
+      <span style="font-size: 1.1rem;">💼</span>
+      <div class="cap-text-col">
+        <span class="cap-label">My Trading Capital</span>
+        <span class="cap-val" id="headerCapitalDisplay">₹50,000</span>
+      </div>
+      <button class="btn-edit-cap">✏️ Edit</button>
+    </div>
+
+    <div class="header-status">
+      <div class="live-indicator">
+        <span class="pulse-dot"></span>
+        <span>NSE / BSE LIVE FEED</span>
+      </div>
+      <div id="istClock" style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">
+        IST: Loading...
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <div class="app-container">
+    
+    <!-- Left Panel: Indian FnO Watchlist -->
+    <aside class="watchlist-panel">
+      <div class="watchlist-header">
+        
+        <!-- AUTO-FIND BEST TRADE FOR MY CAPITAL BUTTON -->
+        <button class="btn-auto-scan-capital" onclick="autoFindBestTradeForCapital()">
+          <span>🎯</span>
+          <span id="btnAutoScanText">Auto-Find Best Trade For ₹50,000</span>
+        </button>
+
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search Indian FnO (NIFTY, RELIANCE...)" oninput="filterWatchlist()" />
+        </div>
+        <div class="category-tabs">
+          <button class="tab-btn active" onclick="setCategory('all')">ALL FnO</button>
+          <button class="tab-btn" onclick="setCategory('Index')">INDICES</button>
+          <button class="tab-btn" onclick="setCategory('Stock')">TOP STOCKS</button>
+        </div>
+      </div>
+
+      <!-- Watchlist Items -->
+      <div class="watchlist-scroll" id="watchlistContainer">
+        <!-- Injected via app.js -->
+      </div>
+    </aside>
+
+    <!-- Right Panel: Live Trading Terminal & Option Chain Scanner -->
+    <main class="terminal-area">
+      
+      <!-- Sub-header Toolbar -->
+      <div class="terminal-toolbar">
+        <div class="active-instrument-meta">
+          <div class="active-name" id="activeName">NIFTY 50</div>
+          <div class="active-price-pill" id="activePricePill">₹23,346.40 (+0.68%)</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);" id="activeRange">H: ₹23,450.00 | L: ₹23,280.20</div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          
+          <!-- Chart Mode Switcher -->
+          <div style="display: flex; gap: 4px; background: var(--bg-card); padding: 2px 4px; border-radius: 6px; border: 1px solid var(--border-color);">
+            <button class="tab-btn active" id="btnModeNative" onclick="setChartEngine('native')">
+              📊 TradingView Pro Engine
+            </button>
+            <button class="tab-btn" id="btnModeTV" onclick="setChartEngine('tv')">
+              📈 TradingView Widget
+            </button>
+          </div>
+
+          <!-- Timeframe Selector -->
+          <div class="tf-selector">
+            <span style="font-size: 0.72rem; color: var(--text-dim); margin-right: 4px;">TF:</span>
+            <button class="tf-btn" onclick="switchTimeframe('1m')">1m</button>
+            <button class="tf-btn active" onclick="switchTimeframe('5m')">5m</button>
+            <button class="tf-btn" onclick="switchTimeframe('15m')">15m</button>
+            <button class="tf-btn" onclick="switchTimeframe('1d')">1D</button>
+          </div>
+
+          <!-- Direct TradingView Official Pop-out Button -->
+          <button class="btn" style="background: #1e2638; border: 1px solid #36425a; color: #fff; font-size: 0.75rem; padding: 4px 8px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 4px;" onclick="openInTradingViewTab()" title="Open official chart on TradingView.com">
+            <span>↗️</span> TradingView Tab
+          </button>
+
+          <button class="btn-scan-now" onclick="triggerDeepScan()">
+            <span>🔍</span> Re-Scan
+          </button>
+        </div>
+      </div>
+
+      <!-- Chart & Scanner Split -->
+      <div class="chart-and-scanner-split">
+        
+        <!-- Live Chart Container -->
+        <div class="chart-wrapper" id="mainChartWrapper">
+          
+          <!-- TradingView Lightweight Charts Container (100% Real TradingView Engine & Live Candles) -->
+          <div id="tv_lightweight_chart" style="width: 100%; height: 100%;"></div>
+
+          <!-- TradingView Widget Container (when toggled) -->
+          <div id="tv_chart_container" style="display: none; width: 100%; height: 100%;"></div>
+          
+          <!-- Hover OHLC Header -->
+          <div id="nativeOhlcHeader" style="position: absolute; top: 10px; left: 15px; background: rgba(17, 22, 34, 0.85); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 5px; font-size: 0.75rem; border: 1px solid var(--border-color); color: var(--text-muted); z-index: 5; pointer-events: none;">
+            <span id="chartSymbolTitle" style="color:var(--blue); font-weight:700; margin-right:8px;">NIFTY 50 (5m)</span>
+            O: <span id="valO" style="color:#fff;">-</span> H: <span id="valH" style="color:#fff;">-</span> L: <span id="valL" style="color:#fff;">-</span> C: <span id="valC" style="color:#fff;">-</span>
+            EMA9: <span id="valE9" style="color:var(--blue);">-</span> EMA21: <span id="valE21" style="color:var(--gold);">-</span>
+          </div>
+
+          <!-- Loading / Scanning Overlay -->
+          <div class="scan-overlay" id="scanOverlay">
+            <div class="scan-radar"></div>
+            <div class="scan-msg" id="scanStatusMsg">Scanning Live Candles & Option Chain OI...</div>
+          </div>
+        </div>
+
+        <!-- Bottom Engine: Option Chain Recommendation & Capital Sizing -->
+        <div class="scanner-engine-panel">
+          
+          <!-- Card 1: Trade Signal & Recommended Option Strike with User Capital Allocation -->
+          <div class="recommendation-card">
+            <div class="rec-header">
+              <div>
+                <span class="signal-type-badge call" id="recSignalBadge">🎯 BUY CALL (CE)</span>
+                <div class="strike-title" id="recStrikeTitle">NIFTY 23350 CE</div>
+              </div>
+              <div style="text-align: right;">
+                <span class="badge-tag" style="background: rgba(0, 210, 255, 0.15); color: var(--blue);">CURRENT EXPIRY</span>
+              </div>
+            </div>
+
+            <!-- Trade Execution Levels -->
+            <div class="rec-levels-grid">
+              <div class="level-box entry">
+                <div class="level-label">Buy Entry Range</div>
+                <div class="level-value" id="recEntry" style="color: var(--blue);">₹132.3 - ₹137.7</div>
+              </div>
+              <div class="level-box sl">
+                <div class="level-label">Strict Stop-Loss</div>
+                <div class="level-value" id="recSL" style="color: var(--red);">₹108.00</div>
+              </div>
+              <div class="level-box target">
+                <div class="level-label">Target 1 / Target 2</div>
+                <div class="level-value" id="recTarget" style="color: var(--green);">₹175.5 / ₹210.6</div>
+              </div>
+            </div>
+
+            <!-- Capital-Based Sizing Breakdown -->
+            <div class="capital-sizing-box">
+              <div class="sizing-row">
+                <span class="sizing-tag">🎯 Recommended Purchase:</span>
+                <span class="sizing-num" id="capLotsAllowed">3 Lots (75 Qty)</span>
+              </div>
+              <div class="sizing-row">
+                <span style="color: var(--text-muted);">Capital Used / Balance:</span>
+                <span id="capDeployedRatio" style="font-weight:700;">₹10,125 / ₹39,875 (Cash Reserve)</span>
+              </div>
+            </div>
+
+            <div class="rec-footer">
+              <span id="recRiskReward">Risk / Reward: 1 : 2.80</span>
+              <span style="color: var(--gold); font-weight: 700; cursor: pointer;" onclick="openCapitalModal()">⚙️ Adjust Capital</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Candlestick & Technical Confluence Checklist -->
+          <div class="technical-analysis-card">
+            <div class="tech-title">
+              <span>📊 Live Candlestick & Price-Action Checklist</span>
+              <span id="candlePatternTag" style="color: var(--green); font-size: 0.78rem;">Bullish Hammer Rejection</span>
+            </div>
+
+            <div class="checklist">
+              <div class="check-item">
+                <span class="check-icon">📈</span>
+                <span class="check-text">Trend Bias:</span>
+                <span class="check-val up" id="chkTrend">Above 50 Baseline</span>
+              </div>
+              <div class="check-item">
+                <span class="check-icon">🕯️</span>
+                <span class="check-text">Candle Wick:</span>
+                <span class="check-val up" id="chkWick">Lower Wick 64%</span>
+              </div>
+              <div class="check-item">
+                <span class="check-icon">🌊</span>
+                <span class="check-text">VWAP Level:</span>
+                <span class="check-val up" id="chkVWAP">Trading Above VWAP</span>
+              </div>
+              <div class="check-item">
+                <span class="check-icon">⚡</span>
+                <span class="check-text">RSI Momentum:</span>
+                <span class="check-val" id="chkRSI" style="color: var(--blue);">62.4 (Expansion)</span>
+              </div>
+              <div class="check-item">
+                <span class="check-icon">🎯</span>
+                <span class="check-text">Day High/Low:</span>
+                <span class="check-val up" id="chkDayHL">Near Day High</span>
+              </div>
+              <div class="check-item">
+                <span class="check-icon">📊</span>
+                <span class="check-text">Option Chain PCR:</span>
+                <span class="check-val up" id="chkPCR">1.28 (Strong Call Buildup)</span>
+              </div>
+            </div>
+
+            <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 4px;" id="rationaleText">
+              <b>Setup Reason:</b> Price formed a clean bullish rejection off VWAP with rising volume. Strong Call OI build-up at lower strikes confirms upward momentum.
+            </div>
+          </div>
+
+          <!-- Card 3: Confidence Score & Net P&L Projection -->
+          <div class="confidence-card">
+            <div class="conf-circle-wrap">
+              <div class="conf-number" id="confScore">92%</div>
+              <div class="conf-label">Trade Confluence Score</div>
+            </div>
+
+            <!-- Net Expected Rupee Return based on User's Capital -->
+            <div class="pnl-calc-box">
+              <div class="pnl-row">
+                <span style="color: var(--green);">Target 1 Net Profit:</span>
+                <span style="font-weight: 800; color: var(--green);" id="pnlTarget1">+₹3,150</span>
+              </div>
+              <div class="pnl-row">
+                <span style="color: var(--gold);">Target 2 Net Profit:</span>
+                <span style="font-weight: 800; color: var(--gold);" id="pnlTarget2">+₹5,850</span>
+              </div>
+              <div class="pnl-row" style="border-top: 1px dashed var(--border-color); padding-top: 3px; margin-top: 2px;">
+                <span style="color: var(--red);">Max Stop-Loss Risk:</span>
+                <span style="font-weight: 800; color: var(--red);" id="pnlMaxLoss">-₹2,025</span>
+              </div>
+            </div>
+
+            <div style="font-size: 0.7rem; color: var(--gold); text-align: center; margin-top: 4px;">
+              ⚡ Controlled 2% Risk Allocation
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Capital Input Setup Modal -->
+  <div class="capital-modal-backdrop" id="capitalModalBackdrop">
+    <div class="capital-modal">
+      <div class="modal-title-row">
+        <span class="modal-icon">💰</span>
+        <div>
+          <div class="modal-title">Set Your Trading Capital</div>
+          <div class="modal-desc">Enter the amount of capital you have available to purchase trades today. The tool will scan all Indian FnO options and find the best trade matching your exact capital.</div>
+        </div>
+      </div>
+
+      <div class="capital-input-wrap">
+        <span class="rupee-symbol">₹</span>
+        <input type="number" class="capital-input-field" id="modalCapitalInput" value="50000" min="1000" step="5000" placeholder="50000" />
+      </div>
+
+      <div>
+        <div style="font-size: 0.72rem; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; font-weight: 700;">Quick Presets:</div>
+        <div class="preset-chips">
+          <button class="preset-chip" onclick="setPresetCapital(10000)">₹10,000</button>
+          <button class="preset-chip" onclick="setPresetCapital(25000)">₹25,000</button>
+          <button class="preset-chip" onclick="setPresetCapital(50000)">₹50,000</button>
+          <button class="preset-chip" onclick="setPresetCapital(100000)">₹1,00,000</button>
+          <button class="preset-chip" onclick="setPresetCapital(200000)">₹2,00,000</button>
+        </div>
+      </div>
+
+      <button class="btn-confirm-capital" onclick="saveCapitalFromModal()">
+        🚀 Scan Market & Find Best Trade
+      </button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
