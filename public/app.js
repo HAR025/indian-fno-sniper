@@ -1,5 +1,5 @@
 // Indian FnO Sniper — Standalone Cloud & GitHub Pages Engine
-// Works 100% online without any localhost or server!
+// Features: Full Option Chain Under Capital, TradingView Pro Engine & Capital Sizing
 
 let fnoInstruments = [];
 let currentInstrument = null;
@@ -8,6 +8,8 @@ let activeCategory = 'all';
 let chartEngine = 'native'; // 'native' (Lightweight Charts) or 'tv' (TradingView Widget)
 let liveCandles = [];
 let userCapital = 50000;
+let currentEngineTab = 'signal'; // 'signal' or 'chain'
+let chainFilter = 'all'; // 'all', 'CE', 'PE'
 
 // TradingView Lightweight Charts References
 let tvChart = null;
@@ -17,7 +19,7 @@ let ema9Series = null;
 let ema21Series = null;
 let ema50Series = null;
 
-// Complete Indian FnO Database (Stand-alone client-side)
+// Complete Indian FnO Database
 const DEFAULT_INSTRUMENTS = [
   { id: 'nifty', name: 'NIFTY 50', symbol: 'NSE:NIFTY', tvSymbol: 'CAPITALCOM:NIFTY50', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:NIFTY', yfSymbol: '^NSEI', category: 'Index', basePrice: 23346.40, lotSize: 25, strikeStep: 50, change: '+0.68%', isPositive: true, dayHigh: 23450.00, dayLow: 23280.20 },
   { id: 'banknifty', name: 'BANK NIFTY', symbol: 'NSE:BANKNIFTY', tvSymbol: 'CAPITALCOM:BANKNIFTY', etfSymbol: 'NSE:BANKBEES', officialSymbol: 'NSE:BANKNIFTY', yfSymbol: '^NSEBANK', category: 'Index', basePrice: 56358.70, lotSize: 15, strikeStep: 100, change: '+1.12%', isPositive: true, dayHigh: 56620.00, dayLow: 56150.00 },
@@ -45,7 +47,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     selectInstrument(fnoInstruments[0]);
   }
 
-  // Periodic live candle update
   setInterval(() => {
     if (chartEngine === 'native' && currentInstrument) {
       updateLiveTicks();
@@ -86,7 +87,6 @@ function saveCapitalFromModal() {
     updateCapitalHeaderUI();
     closeCapitalModal();
     renderWatchlist();
-    // Automatically trigger market scan for this capital!
     autoFindBestTradeForCapital();
   } else {
     alert('Please enter a valid capital amount (Minimum ₹1,000)');
@@ -99,6 +99,10 @@ function updateCapitalHeaderUI() {
   const btnScanText = document.getElementById('btnAutoScanText');
   if (btnScanText) {
     btnScanText.textContent = `Auto-Find Best Trade For ${formatted}`;
+  }
+  const chainNote = document.getElementById('chainCapitalNote');
+  if (chainNote) {
+    chainNote.textContent = `Filtered for Capital: ${formatted}`;
   }
 }
 
@@ -118,7 +122,187 @@ function getOptionLotCost(item) {
   };
 }
 
-// 🎯 CORE: Auto-Scan Entire Market for the User's Capital
+// Sub-Tab Switcher (Signal vs Full Option Chain Table)
+function switchEngineTab(tab) {
+  currentEngineTab = tab;
+  const btnSig = document.getElementById('btnTabSignal');
+  const btnChn = document.getElementById('btnTabChain');
+  const viewSig = document.getElementById('viewSignalArea');
+  const viewChn = document.getElementById('viewChainArea');
+
+  if (tab === 'signal') {
+    btnSig.classList.add('active');
+    btnChn.classList.remove('active');
+    viewSig.style.display = 'flex';
+    viewChn.style.display = 'none';
+  } else {
+    btnSig.classList.remove('active');
+    btnChn.classList.add('active');
+    viewSig.style.display = 'none';
+    viewChn.style.display = 'flex';
+    renderOptionChainTable();
+  }
+}
+
+function filterChainType(type) {
+  chainFilter = type;
+  document.querySelectorAll('.chain-chip').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  renderOptionChainTable();
+}
+
+// 📋 RENDER FULL OPTION CHAIN LIST UNDER USER'S CAPITAL
+function renderOptionChainTable() {
+  if (!currentInstrument) return;
+  const tableBody = document.getElementById('chainTableBody');
+  const spot = currentInstrument.basePrice;
+  const step = currentInstrument.strikeStep;
+  const atm = Math.round(spot / step) * step;
+  const { premium: baseAtmPremium } = getOptionLotCost(currentInstrument);
+
+  // Generate 7 strikes around ATM: -3, -2, -1, ATM, +1, +2, +3
+  const strikeDeltas = [-3, -2, -1, 0, 1, 2, 3];
+  const fullChain = [];
+
+  strikeDeltas.forEach(d => {
+    const strike = atm + (d * step);
+    
+    // Call Option (CE)
+    // ITM Calls (lower strike) have higher premium, OTM Calls (higher strike) have lower premium
+    let cePremium = Math.max(12, Math.round((baseAtmPremium - (d * baseAtmPremium * 0.18)) * 10) / 10);
+    let ceMargin = Math.round(cePremium * currentInstrument.lotSize);
+    let ceLots = Math.floor(userCapital / ceMargin);
+
+    // Put Option (PE)
+    // ITM Puts (higher strike) have higher premium, OTM Puts (lower strike) have lower premium
+    let pePremium = Math.max(12, Math.round((baseAtmPremium + (d * baseAtmPremium * 0.18)) * 10) / 10);
+    let peMargin = Math.round(pePremium * currentInstrument.lotSize);
+    let peLots = Math.floor(userCapital / peMargin);
+
+    let descLabel = d === 0 ? 'ATM' : (d < 0 ? `ITM (${Math.abs(d)})` : `OTM (+${d})`);
+    let peDescLabel = d === 0 ? 'ATM' : (d > 0 ? `ITM (+${d})` : `OTM (${Math.abs(d)})`);
+
+    // Only include options that are 100% UNDER the user's capital!
+    if (ceMargin <= userCapital) {
+      fullChain.push({
+        symbol: `${currentInstrument.name} ${strike} CE`,
+        strike: strike,
+        type: 'CE',
+        label: descLabel,
+        premium: cePremium,
+        margin: ceMargin,
+        lotsAllowed: ceLots,
+        isRecommended: d === 0 && currentInstrument.isPositive,
+        sl: (cePremium * 0.80).toFixed(1),
+        tp1: (cePremium * 1.30).toFixed(1),
+        tp2: (cePremium * 1.56).toFixed(1)
+      });
+    }
+
+    if (peMargin <= userCapital) {
+      fullChain.push({
+        symbol: `${currentInstrument.name} ${strike} PE`,
+        strike: strike,
+        type: 'PE',
+        label: peDescLabel,
+        premium: pePremium,
+        margin: peMargin,
+        lotsAllowed: peLots,
+        isRecommended: d === 0 && !currentInstrument.isPositive,
+        sl: (pePremium * 0.80).toFixed(1),
+        tp1: (pePremium * 1.30).toFixed(1),
+        tp2: (pePremium * 1.56).toFixed(1)
+      });
+    }
+  });
+
+  // Filter CE/PE if requested
+  const filtered = fullChain.filter(o => {
+    if (chainFilter === 'CE') return o.type === 'CE';
+    if (chainFilter === 'PE') return o.type === 'PE';
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="9" style="text-align: center; color: var(--gold); padding: 25px;">
+          ⚠️ No option strikes under your current capital (₹${userCapital.toLocaleString('en-IN')}). Please increase your capital or switch to NIFTY 50!
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tableBody.innerHTML = filtered.map(opt => {
+    const isCall = opt.type === 'CE';
+    const tagClass = isCall ? 'call' : 'put';
+    const rowHighlight = opt.isRecommended ? 'recommended-row' : '';
+    const recBadge = opt.isRecommended ? '<span style="color:var(--gold); font-weight:800; margin-left:6px;">⭐ TOP PICK</span>' : '';
+
+    return `
+      <tr class="${rowHighlight}">
+        <td>
+          <b style="color:#fff;">${opt.symbol}</b>
+          <span style="font-size:0.68rem; color:var(--text-muted); margin-left:4px;">(${opt.label})</span>
+          ${recBadge}
+        </td>
+        <td><span class="strike-type-tag ${tagClass}">${opt.type}</span></td>
+        <td style="font-weight:700; color:var(--blue);">₹${opt.premium.toFixed(1)}</td>
+        <td style="font-weight:700;">₹${opt.margin.toLocaleString('en-IN')}</td>
+        <td>
+          <span style="color:var(--green); font-weight:800;">⚡ ${opt.lotsAllowed} ${opt.lotsAllowed === 1 ? 'Lot' : 'Lots'}</span>
+          <span style="font-size:0.68rem; color:var(--text-dim);">(${opt.lotsAllowed * currentInstrument.lotSize} Qty)</span>
+        </td>
+        <td style="color:var(--red); font-weight:700;">₹${opt.sl}</td>
+        <td style="color:var(--green); font-weight:700;">₹${opt.tp1}</td>
+        <td style="color:var(--gold); font-weight:700;">₹${opt.tp2}</td>
+        <td>
+          <button class="btn-trade-strike" onclick="selectSpecificOptionTrade('${opt.symbol}', ${opt.premium}, ${opt.margin}, ${opt.lotsAllowed}, ${opt.sl}, ${opt.tp1}, ${opt.tp2}, '${opt.type}')">
+            🎯 Select Trade
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// When user clicks "Select Trade" on any strike in the option chain table
+function selectSpecificOptionTrade(symbol, premium, margin, lots, sl, tp1, tp2, type) {
+  const isCall = type === 'CE';
+  
+  // Update recommendation card
+  document.getElementById('recStrikeTitle').textContent = symbol;
+  const badge = document.getElementById('recSignalBadge');
+  badge.textContent = isCall ? '🎯 BUY CALL (CE)' : '🎯 BUY PUT (PE)';
+  badge.className = isCall ? 'signal-type-badge call' : 'signal-type-badge put';
+
+  document.getElementById('recEntry').textContent = `₹${(premium * 0.98).toFixed(1)} - ₹${(premium * 1.02).toFixed(1)}`;
+  document.getElementById('recSL').textContent = `₹${sl} (-${(premium - sl).toFixed(1)} pts)`;
+  document.getElementById('recTarget').textContent = `₹${tp1} / ₹${tp2}`;
+
+  // Safe lot allocation (max 40% of capital for risk preservation)
+  const safeLots = Math.max(1, Math.min(lots, Math.floor((userCapital * 0.40) / margin)));
+  const totalQty = safeLots * currentInstrument.lotSize;
+  const totalCost = safeLots * margin;
+  const remainingCash = userCapital - totalCost;
+
+  document.getElementById('capLotsAllowed').textContent = `${safeLots} ${safeLots === 1 ? 'Lot' : 'Lots'} (${totalQty} Qty)`;
+  document.getElementById('capDeployedRatio').textContent = `₹${totalCost.toLocaleString('en-IN')} used | ₹${remainingCash.toLocaleString('en-IN')} cash reserve`;
+
+  const pnl1 = Math.round(totalQty * (tp1 - premium));
+  const pnl2 = Math.round(totalQty * (tp2 - premium));
+  const maxLoss = Math.round(totalQty * (premium - sl));
+
+  document.getElementById('pnlTarget1').textContent = `+₹${pnl1.toLocaleString('en-IN')}`;
+  document.getElementById('pnlTarget2').textContent = `+₹${pnl2.toLocaleString('en-IN')}`;
+  document.getElementById('pnlMaxLoss').textContent = `-₹${maxLoss.toLocaleString('en-IN')}`;
+
+  // Switch back to Signal View to review trade
+  switchEngineTab('signal');
+}
+
+// 🎯 Auto-Scan Entire Market for Capital
 function autoFindBestTradeForCapital() {
   const overlay = document.getElementById('scanOverlay');
   const msg = document.getElementById('scanStatusMsg');
@@ -142,15 +326,14 @@ function autoFindBestTradeForCapital() {
       clearInterval(interval);
       overlay.style.display = 'none';
 
-      // Score instruments based on affordability and confluence
       let candidates = fnoInstruments.map(item => {
         const { premium, costPerLot } = getOptionLotCost(item);
         const lots = Math.floor(userCapital / costPerLot);
         let score = 0;
         if (lots >= 1) {
           score += 50;
-          if (lots >= 2 && lots <= 5) score += 35; // optimal position size
-          if (item.category === 'Index') score += 20; // highest liquidity
+          if (lots >= 2 && lots <= 5) score += 35;
+          if (item.category === 'Index') score += 20;
           if (item.isPositive) score += 10;
         }
         return { item, lots, costPerLot, score };
@@ -164,7 +347,6 @@ function autoFindBestTradeForCapital() {
   }, 350);
 }
 
-// IST Clock
 function startISTClock() {
   function update() {
     const now = new Date();
@@ -176,7 +358,6 @@ function startISTClock() {
   setInterval(update, 1000);
 }
 
-// TradingView Lightweight Charts Setup
 function initTradingViewLightweightChart() {
   const container = document.getElementById('tv_lightweight_chart');
   container.innerHTML = '';
@@ -269,7 +450,6 @@ function renderWatchlist() {
     const isSelected = currentInstrument && currentInstrument.id === item.id;
     const changeClass = item.isPositive ? 'up' : 'down';
     
-    // Check lot affordability against userCapital
     const { costPerLot } = getOptionLotCost(item);
     const lotsAffordable = Math.floor(userCapital / costPerLot);
 
@@ -334,6 +514,9 @@ function selectInstrument(item) {
 
   loadChart();
   runDeepScan(item);
+  if (currentEngineTab === 'chain') {
+    renderOptionChainTable();
+  }
 }
 
 function findTradeFor(id) {
@@ -392,7 +575,6 @@ function loadChart() {
   }
 }
 
-// Generate Realistic High-Definition Candles for Instrument
 function loadCandlesForInstrument(item, fitContent = false) {
   liveCandles = [];
   let p = item.basePrice;
@@ -420,7 +602,6 @@ function loadCandlesForInstrument(item, fitContent = false) {
   updateTradingViewLightweightChart(fitContent);
 }
 
-// Live tick updates in real time
 function updateLiveTicks() {
   if (liveCandles.length === 0 || !currentInstrument) return;
   let last = liveCandles[liveCandles.length - 1];
@@ -543,7 +724,7 @@ function runDeepScan(item) {
   const steps = [
     `Scanning ${item.name} (${currentTF}) Candlestick Structure...`,
     `Verifying 50 EMA Trend & VWAP Support/Resistance...`,
-    `Calculating Safe Lots for Capital ₹${userCapital.toLocaleString('en-IN')}...`,
+    `Filtering Option Chain Strikes Under ₹${userCapital.toLocaleString('en-IN')}...`,
     `Selecting Optimal Strike & Setting Strict Stop Loss...`
   ];
 
@@ -562,7 +743,6 @@ function runDeepScan(item) {
   }, 350);
 }
 
-// Compute Option Strike & Sizing Based Strictly On User's Capital
 function computeAndRenderRecommendation(item) {
   const isBullish = item.isPositive;
   const spotPrice = item.basePrice;
@@ -578,7 +758,6 @@ function computeAndRenderRecommendation(item) {
   const premiumEntryLow = (basePremium * 0.98).toFixed(1);
   const premiumEntryHigh = (basePremium * 1.02).toFixed(1);
 
-  // Stop Loss & Targets
   const slPoints = basePremium * 0.20;
   const stopLoss = (basePremium - slPoints).toFixed(1);
   const tp1Points = slPoints * 1.5;
@@ -586,9 +765,7 @@ function computeAndRenderRecommendation(item) {
   const tp2Points = slPoints * 2.8;
   const target2 = (basePremium + tp2Points).toFixed(1);
 
-  // 💰 CAPITAL ENFORCEMENT
   let lotsAllowed = Math.floor(userCapital / costPerLot);
-  // Cap at 40% of capital for risk preservation, but at least 1 lot if user can afford it
   const maxLotsRiskControlled = Math.max(1, Math.floor((userCapital * 0.40) / costPerLot));
   if (lotsAllowed > maxLotsRiskControlled) {
     lotsAllowed = maxLotsRiskControlled;
@@ -621,10 +798,9 @@ function computeAndRenderRecommendation(item) {
     document.getElementById('pnlTarget2').textContent = `+₹${netPnlTarget2.toLocaleString('en-IN')}`;
     document.getElementById('pnlMaxLoss').textContent = `-₹${maxLossSL.toLocaleString('en-IN')}`;
   } else {
-    // Flag insufficient capital and show suggestion
     document.getElementById('capLotsAllowed').textContent = `⚠️ Need ₹${costPerLot.toLocaleString('en-IN')} (Capital low)`;
     document.getElementById('capDeployedRatio').textContent = `Your capital ₹${userCapital.toLocaleString('en-IN')} is below 1 lot margin!`;
-    document.getElementById('pnlTarget1').textContent = `⚠️ Trade NIFTY 50 instead (Fits your capital)`;
+    document.getElementById('pnlTarget1').textContent = `⚠️ Click 'Full Option Chain' to pick cheaper OTM strike`;
     document.getElementById('pnlTarget2').textContent = `-`;
     document.getElementById('pnlMaxLoss').textContent = `-`;
   }
