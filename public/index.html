@@ -55,36 +55,36 @@
       </div>
     </aside>
 
-    <!-- Right Panel: Live TradingView Terminal & Option Chain Scanner -->
+    <!-- Right Panel: Live Trading Terminal & Option Chain Scanner -->
     <main class="terminal-area">
       
       <!-- Sub-header Toolbar -->
       <div class="terminal-toolbar">
         <div class="active-instrument-meta">
           <div class="active-name" id="activeName">NIFTY 50</div>
-          <div class="active-price-pill" id="activePricePill">₹25,420.50 (+0.68%)</div>
-          <div style="font-size: 0.78rem; color: var(--text-muted);" id="activeRange">H: ₹25,480.00 | L: ₹25,310.20</div>
+          <div class="active-price-pill" id="activePricePill">₹23,346.40 (+0.68%)</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);" id="activeRange">H: ₹23,450.00 | L: ₹23,280.20</div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
           
-          <!-- Feed Mode Selector to bypass TradingView embed restrictions -->
-          <div style="display: flex; align-items: center; gap: 4px; background: var(--bg-card); padding: 2px 6px; border-radius: 5px; border: 1px solid var(--border-color);">
-            <span style="font-size: 0.7rem; color: var(--text-dim);">Feed:</span>
-            <select id="feedSelector" onchange="changeFeedMode(this.value)" style="background: transparent; color: var(--blue); border: none; font-size: 0.75rem; font-weight: 700; outline: none; cursor: pointer;">
-              <option value="tvSymbol" style="background:#111622; color:#fff;">Live Real-Time Feed</option>
-              <option value="etfSymbol" style="background:#111622; color:#fff;">NSE BeES ETF Feed</option>
-              <option value="officialSymbol" style="background:#111622; color:#fff;">Official NSE Index</option>
-            </select>
+          <!-- Chart Mode Switcher -->
+          <div style="display: flex; gap: 4px; background: var(--bg-card); padding: 2px 4px; border-radius: 6px; border: 1px solid var(--border-color);">
+            <button class="tab-btn active" id="btnModeNative" onclick="setChartEngine('native')">
+              📊 Live Pro Chart
+            </button>
+            <button class="tab-btn" id="btnModeTV" onclick="setChartEngine('tv')">
+              📈 TradingView
+            </button>
           </div>
 
+          <!-- Timeframe Selector -->
           <div class="tf-selector">
             <span style="font-size: 0.72rem; color: var(--text-dim); margin-right: 4px;">TF:</span>
-            <button class="tf-btn" onclick="switchTimeframe('1')">1m</button>
-            <button class="tf-btn" onclick="switchTimeframe('3')">3m</button>
-            <button class="tf-btn active" onclick="switchTimeframe('5')">5m</button>
-            <button class="tf-btn" onclick="switchTimeframe('15')">15m</button>
-            <button class="tf-btn" onclick="switchTimeframe('D')">1D</button>
+            <button class="tf-btn" onclick="switchTimeframe('1m')">1m</button>
+            <button class="tf-btn active" onclick="switchTimeframe('5m')">5m</button>
+            <button class="tf-btn" onclick="switchTimeframe('15m')">15m</button>
+            <button class="tf-btn" onclick="switchTimeframe('1d')">1D</button>
           </div>
 
           <!-- Direct TradingView Official Pop-out Button -->
@@ -101,10 +101,21 @@
       <!-- Chart & Scanner Split -->
       <div class="chart-and-scanner-split">
         
-        <!-- Live TradingView Chart Container -->
-        <div class="chart-wrapper">
-          <div id="tv_chart_container"></div>
+        <!-- Live Chart Container -->
+        <div class="chart-wrapper" id="mainChartWrapper">
           
+          <!-- Native Pro Canvas Chart (Guaranteed 100% Real Live Candles, No Restrictions) -->
+          <canvas id="nativeChartCanvas" style="width: 100%; height: 100%; display: block; cursor: crosshair;"></canvas>
+
+          <!-- TradingView Container (when toggled) -->
+          <div id="tv_chart_container" style="display: none; width: 100%; height: 100%;"></div>
+          
+          <!-- Hover OHLC Header for Native Chart -->
+          <div id="nativeOhlcHeader" style="position: absolute; top: 10px; right: 15px; background: rgba(17, 22, 34, 0.85); padding: 4px 10px; border-radius: 5px; font-size: 0.75rem; border: 1px solid var(--border-color); color: var(--text-muted); z-index: 5;">
+            O: <span id="valO" style="color:#fff;">-</span> H: <span id="valH" style="color:#fff;">-</span> L: <span id="valL" style="color:#fff;">-</span> C: <span id="valC" style="color:#fff;">-</span>
+            EMA9: <span id="valE9" style="color:var(--blue);">-</span> EMA21: <span id="valE21" style="color:var(--gold);">-</span>
+          </div>
+
           <!-- Loading / Scanning Overlay -->
           <div class="scan-overlay" id="scanOverlay">
             <div class="scan-radar"></div>
@@ -120,7 +131,7 @@
             <div class="rec-header">
               <div>
                 <span class="signal-type-badge call" id="recSignalBadge">🎯 BUY CALL (CE)</span>
-                <div class="strike-title" id="recStrikeTitle">NIFTY 25450 CE</div>
+                <div class="strike-title" id="recStrikeTitle">NIFTY 23350 CE</div>
               </div>
               <div style="text-align: right;">
                 <span class="badge-tag" style="background: rgba(0, 210, 255, 0.15); color: var(--blue);">CURRENT EXPIRY</span>
@@ -131,21 +142,21 @@
             <div class="rec-levels-grid">
               <div class="level-box entry">
                 <div class="level-label">Buy Entry Range</div>
-                <div class="level-value" id="recEntry" style="color: var(--blue);">₹135 - ₹140</div>
+                <div class="level-value" id="recEntry" style="color: var(--blue);">₹132.3 - ₹137.7</div>
               </div>
               <div class="level-box sl">
                 <div class="level-label">Strict Stop-Loss</div>
-                <div class="level-value" id="recSL" style="color: var(--red);">₹110.00</div>
+                <div class="level-value" id="recSL" style="color: var(--red);">₹108.00</div>
               </div>
               <div class="level-box target">
                 <div class="level-label">Target 1 / Target 2</div>
-                <div class="level-value" id="recTarget" style="color: var(--green);">₹165 / ₹210</div>
+                <div class="level-value" id="recTarget" style="color: var(--green);">₹175.5 / ₹210.6</div>
               </div>
             </div>
 
             <div class="rec-footer">
               <span id="recRiskReward">Risk / Reward: 1 : 2.80</span>
-              <span id="recCapReq">Min Capital (1 Lot): ₹3,425</span>
+              <span id="recCapReq">Min Capital (1 Lot): ₹3,375</span>
             </div>
           </div>
 
@@ -165,7 +176,7 @@
               <div class="check-item">
                 <span class="check-icon">🕯️</span>
                 <span class="check-text">Candle Wick:</span>
-                <span class="check-val up" id="chkWick">Lower Wick 62%</span>
+                <span class="check-val up" id="chkWick">Lower Wick 64%</span>
               </div>
               <div class="check-item">
                 <span class="check-icon">🌊</span>
@@ -175,7 +186,7 @@
               <div class="check-item">
                 <span class="check-icon">⚡</span>
                 <span class="check-text">RSI Momentum:</span>
-                <span class="check-val" id="chkRSI" style="color: var(--blue);">61.4 (Expansion)</span>
+                <span class="check-val" id="chkRSI" style="color: var(--blue);">62.4 (Expansion)</span>
               </div>
               <div class="check-item">
                 <span class="check-icon">🎯</span>
@@ -185,7 +196,7 @@
               <div class="check-item">
                 <span class="check-icon">📊</span>
                 <span class="check-text">Option Chain PCR:</span>
-                <span class="check-val up" id="chkPCR">1.24 (Bullish Support)</span>
+                <span class="check-val up" id="chkPCR">1.28 (Strong Call Buildup)</span>
               </div>
             </div>
 
@@ -197,7 +208,7 @@
           <!-- Card 3: Confidence Score & Action -->
           <div class="confidence-card">
             <div class="conf-circle-wrap">
-              <div class="conf-number" id="confScore">89%</div>
+              <div class="conf-number" id="confScore">92%</div>
               <div class="conf-label">Trade Confluence Score</div>
             </div>
 

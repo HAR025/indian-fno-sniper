@@ -9,9 +9,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Master Indian FnO Instruments Database
-// tvSymbol: optimized for TradingView Widget without NSE embed block
-// officialSymbol: for opening directly on TradingView official website
+// Master Indian FnO Instruments Database with Yahoo Finance & TradingView symbols
 const FNO_INSTRUMENTS = [
   {
     id: 'nifty',
@@ -20,14 +18,15 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'CAPITALCOM:NIFTY50',
     etfSymbol: 'NSE:NIFTYBEES',
     officialSymbol: 'NSE:NIFTY',
+    yfSymbol: '^NSEI',
     category: 'Index',
-    basePrice: 25420.50,
+    basePrice: 23346.40,
     lotSize: 25,
     strikeStep: 50,
     change: '+0.68%',
     isPositive: true,
-    dayHigh: 25480.00,
-    dayLow: 25310.20
+    dayHigh: 23450.00,
+    dayLow: 23280.20
   },
   {
     id: 'banknifty',
@@ -36,14 +35,15 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'CAPITALCOM:BANKNIFTY',
     etfSymbol: 'NSE:BANKBEES',
     officialSymbol: 'NSE:BANKNIFTY',
+    yfSymbol: '^NSEBANK',
     category: 'Index',
-    basePrice: 52940.80,
+    basePrice: 56358.70,
     lotSize: 15,
     strikeStep: 100,
     change: '+1.12%',
     isPositive: true,
-    dayHigh: 53120.00,
-    dayLow: 52650.00
+    dayHigh: 56620.00,
+    dayLow: 56150.00
   },
   {
     id: 'sensex',
@@ -52,6 +52,7 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'BSE:SENSEX',
     etfSymbol: 'BSE:SENSEX',
     officialSymbol: 'BSE:SENSEX',
+    yfSymbol: '^BSESN',
     category: 'Index',
     basePrice: 83180.20,
     lotSize: 10,
@@ -68,6 +69,7 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'CAPITALCOM:FINNIFTY',
     etfSymbol: 'NSE:NIFTYBEES',
     officialSymbol: 'NSE:FINNIFTY',
+    yfSymbol: 'NIFTY_FIN_SERVICE.NS',
     category: 'Index',
     basePrice: 24150.30,
     lotSize: 25,
@@ -78,28 +80,13 @@ const FNO_INSTRUMENTS = [
     dayLow: 24080.00
   },
   {
-    id: 'midcpnifty',
-    name: 'MIDCAP NIFTY',
-    symbol: 'NSE:MIDCPNIFTY',
-    tvSymbol: 'CAPITALCOM:NIFTY50',
-    etfSymbol: 'NSE:NIFTYBEES',
-    officialSymbol: 'NSE:MIDCPNIFTY',
-    category: 'Index',
-    basePrice: 13240.60,
-    lotSize: 50,
-    strikeStep: 25,
-    change: '-0.22%',
-    isPositive: false,
-    dayHigh: 13310.00,
-    dayLow: 13190.00
-  },
-  {
     id: 'reliance',
     name: 'RELIANCE',
     symbol: 'BSE:RELIANCE',
     tvSymbol: 'BSE:RELIANCE',
     etfSymbol: 'NSE:RELIANCE',
     officialSymbol: 'NSE:RELIANCE',
+    yfSymbol: 'RELIANCE.NS',
     category: 'Stock',
     basePrice: 2985.40,
     lotSize: 250,
@@ -116,6 +103,7 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'BSE:HDFCBANK',
     etfSymbol: 'NSE:HDFCBANK',
     officialSymbol: 'NSE:HDFCBANK',
+    yfSymbol: 'HDFCBANK.NS',
     category: 'Stock',
     basePrice: 1675.20,
     lotSize: 550,
@@ -132,6 +120,7 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'BSE:ICICIBANK',
     etfSymbol: 'NSE:ICICIBANK',
     officialSymbol: 'NSE:ICICIBANK',
+    yfSymbol: 'ICICIBANK.NS',
     category: 'Stock',
     basePrice: 1245.80,
     lotSize: 700,
@@ -148,6 +137,7 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'BSE:TATAMOTORS',
     etfSymbol: 'NSE:TATAMOTORS',
     officialSymbol: 'NSE:TATAMOTORS',
+    yfSymbol: 'TATAMOTORS.NS',
     category: 'Stock',
     basePrice: 978.60,
     lotSize: 1425,
@@ -164,6 +154,7 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'BSE:TCS',
     etfSymbol: 'NSE:TCS',
     officialSymbol: 'NSE:TCS',
+    yfSymbol: 'TCS.NS',
     category: 'Stock',
     basePrice: 4290.00,
     lotSize: 175,
@@ -180,6 +171,7 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'BSE:INFY',
     etfSymbol: 'NSE:INFY',
     officialSymbol: 'NSE:INFY',
+    yfSymbol: 'INFY.NS',
     category: 'Stock',
     basePrice: 1912.30,
     lotSize: 400,
@@ -196,6 +188,7 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'BSE:SBIN',
     etfSymbol: 'NSE:SBIN',
     officialSymbol: 'NSE:SBIN',
+    yfSymbol: 'SBIN.NS',
     category: 'Stock',
     basePrice: 792.40,
     lotSize: 1500,
@@ -212,6 +205,7 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'BSE:BAJFINANCE',
     etfSymbol: 'NSE:BAJFINANCE',
     officialSymbol: 'NSE:BAJFINANCE',
+    yfSymbol: 'BAJFINANCE.NS',
     category: 'Stock',
     basePrice: 7540.00,
     lotSize: 125,
@@ -228,6 +222,7 @@ const FNO_INSTRUMENTS = [
     tvSymbol: 'BSE:BHARTIARTL',
     etfSymbol: 'NSE:BHARTIARTL',
     officialSymbol: 'NSE:BHARTIARTL',
+    yfSymbol: 'BHARTIARTL.NS',
     category: 'Stock',
     basePrice: 1650.00,
     lotSize: 475,
@@ -245,6 +240,61 @@ app.get('/api/fno-list', (req, res) => {
     timestamp: new Date().toISOString(),
     instruments: FNO_INSTRUMENTS
   });
+});
+
+// Endpoint to fetch real live candlestick data from live markets
+app.get('/api/candles', async (req, res) => {
+  const id = req.query.id || 'nifty';
+  const interval = req.query.interval || '5m';
+  const inst = FNO_INSTRUMENTS.find(x => x.id === id) || FNO_INSTRUMENTS[0];
+  const yfSymbol = encodeURIComponent(inst.yfSymbol || '^NSEI');
+
+  try {
+    const range = interval === '1d' ? '3mo' : (interval === '15m' ? '5d' : '1d');
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yfSymbol}?interval=${interval}&range=${range}`;
+    
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upstream returned ${response.status}`);
+    }
+
+    const data = await response.json();
+    const result = data.chart.result[0];
+    const timestamps = result.timestamp || [];
+    const quote = result.indicators.quote[0];
+    const meta = result.meta;
+
+    const candles = [];
+    for (let i = 0; i < timestamps.length; i++) {
+      if (quote.open[i] != null && quote.close[i] != null) {
+        candles.push({
+          time: timestamps[i] * 1000,
+          open: parseFloat(quote.open[i].toFixed(2)),
+          high: parseFloat(quote.high[i].toFixed(2)),
+          low: parseFloat(quote.low[i].toFixed(2)),
+          close: parseFloat(quote.close[i].toFixed(2)),
+          volume: quote.volume[i] || 0
+        });
+      }
+    }
+
+    res.json({
+      status: 'success',
+      symbol: inst.name,
+      regularMarketPrice: meta.regularMarketPrice,
+      regularMarketDayHigh: meta.regularMarketDayHigh,
+      regularMarketDayLow: meta.regularMarketDayLow,
+      candles: candles
+    });
+  } catch (err) {
+    console.error('Candle fetch error:', err.message);
+    res.status(500).json({ status: 'error', message: err.message });
+  }
 });
 
 app.get('*', (req, res) => {
