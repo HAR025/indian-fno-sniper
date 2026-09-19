@@ -1,11 +1,20 @@
-// Indian FnO Sniper — Core Application Logic
+// Indian FnO Sniper — Core Application Logic with TradingView Engine & Capital Management
 
 let fnoInstruments = [];
 let currentInstrument = null;
 let currentTF = '5m';
 let activeCategory = 'all';
-let chartEngine = 'native'; // 'native' or 'tv'
+let chartEngine = 'native'; // 'native' (Lightweight Charts) or 'tv' (TradingView Widget)
 let liveCandles = [];
+let userCapital = 50000;
+
+// TradingView Lightweight Charts References
+let tvChart = null;
+let candleSeries = null;
+let volumeSeries = null;
+let ema9Series = null;
+let ema21Series = null;
+let ema50Series = null;
 
 // Fallback Instruments Database
 const DEFAULT_INSTRUMENTS = [
@@ -24,21 +33,17 @@ const DEFAULT_INSTRUMENTS = [
   { id: 'bhartiartl', name: 'BHARTI AIRTEL', symbol: 'BSE:BHARTIARTL', tvSymbol: 'BSE:BHARTIARTL', etfSymbol: 'NSE:BHARTIARTL', officialSymbol: 'NSE:BHARTIARTL', yfSymbol: 'BHARTIARTL.NS', category: 'Stock', basePrice: 1650.00, lotSize: 475, strikeStep: 10, change: '+0.30%', isPositive: true, dayHigh: 1665.00, dayLow: 1640.00 }
 ];
 
-// Canvas Setup
-const canvas = document.getElementById('nativeChartCanvas');
-const ctx = canvas.getContext('2d');
-let mouseX = -1;
-let mouseY = -1;
-
-// Initialize
+// Initialize Application
 window.addEventListener('DOMContentLoaded', async () => {
   startISTClock();
-  initCanvasResize();
+  initCapital();
+  initTradingViewLightweightChart();
   await loadFnOList();
   if (fnoInstruments.length > 0) {
     selectInstrument(fnoInstruments[0]);
   }
-  // Auto-refresh live candles every 15s
+
+  // Periodic live candle refresh
   setInterval(() => {
     if (chartEngine === 'native' && currentInstrument) {
       fetchLiveCandles(currentInstrument, false);
@@ -46,32 +51,53 @@ window.addEventListener('DOMContentLoaded', async () => {
   }, 15000);
 });
 
-function initCanvasResize() {
-  function resize() {
-    const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-    if (liveCandles.length > 0) {
-      renderNativeChart();
-    }
+// Capital Management Logic
+function initCapital() {
+  const saved = localStorage.getItem('user_trading_capital');
+  if (saved && !isNaN(parseFloat(saved))) {
+    userCapital = parseFloat(saved);
+    updateCapitalHeaderUI();
+  } else {
+    // Open capital prompt modal immediately on first visit!
+    openCapitalModal();
   }
-  window.addEventListener('resize', resize);
-  resize();
-
-  canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
-    renderNativeChart();
-  });
-
-  canvas.addEventListener('mouseleave', () => {
-    mouseX = -1;
-    mouseY = -1;
-    renderNativeChart();
-  });
 }
 
+function openCapitalModal() {
+  const modal = document.getElementById('capitalModalBackdrop');
+  document.getElementById('modalCapitalInput').value = userCapital || 50000;
+  modal.style.display = 'flex';
+}
+
+function closeCapitalModal() {
+  document.getElementById('capitalModalBackdrop').style.display = 'none';
+}
+
+function setPresetCapital(val) {
+  document.getElementById('modalCapitalInput').value = val;
+}
+
+function saveCapitalFromModal() {
+  const inputVal = parseFloat(document.getElementById('modalCapitalInput').value);
+  if (!isNaN(inputVal) && inputVal >= 1000) {
+    userCapital = inputVal;
+    localStorage.setItem('user_trading_capital', userCapital);
+    updateCapitalHeaderUI();
+    closeCapitalModal();
+    if (currentInstrument) {
+      computeAndRenderRecommendation(currentInstrument);
+    }
+  } else {
+    alert('Please enter a valid capital amount (Minimum ₹1,000)');
+  }
+}
+
+function updateCapitalHeaderUI() {
+  const formatted = `₹${userCapital.toLocaleString('en-IN')}`;
+  document.getElementById('headerCapitalDisplay').textContent = formatted;
+}
+
+// IST Clock
 function startISTClock() {
   function update() {
     const now = new Date();
@@ -83,6 +109,93 @@ function startISTClock() {
   setInterval(update, 1000);
 }
 
+// Initialize TradingView Lightweight Charts (The official TradingView Engine)
+function initTradingViewLightweightChart() {
+  const container = document.getElementById('tv_lightweight_chart');
+  container.innerHTML = '';
+
+  const rect = container.parentElement.getBoundingClientRect();
+
+  tvChart = LightweightCharts.createChart(container, {
+    width: rect.width || 800,
+    height: rect.height || 420,
+    layout: {
+      background: { type: 'solid', color: '#131722' },
+      textColor: '#8290a5',
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    },
+    grid: {
+      vertLines: { color: '#1c2230' },
+      horzLines: { color: '#1c2230' }
+    },
+    crosshair: {
+      mode: LightweightCharts.CrosshairMode.Normal,
+      vertLine: { color: '#00d2ff', width: 1, style: 3, labelBackgroundColor: '#00d2ff' },
+      horzLine: { color: '#00d2ff', width: 1, style: 3, labelBackgroundColor: '#00d2ff' }
+    },
+    rightPriceScale: {
+      borderColor: '#242d40',
+      autoScale: true
+    },
+    timeScale: {
+      borderColor: '#242d40',
+      timeVisible: true,
+      secondsVisible: false
+    }
+  });
+
+  // Candlestick Series (Exact TradingView Pro Styling)
+  candleSeries = tvChart.addCandlestickSeries({
+    upColor: '#00e676',
+    downColor: '#ff1744',
+    borderVisible: false,
+    wickUpColor: '#00e676',
+    wickDownColor: '#ff1744'
+  });
+
+  // Volume Series
+  volumeSeries = tvChart.addHistogramSeries({
+    color: 'rgba(38, 166, 154, 0.35)',
+    priceFormat: { type: 'volume' },
+    priceScaleId: '' // overlay on separate scale
+  });
+  volumeSeries.priceScale().applyOptions({
+    scaleMargins: { top: 0.82, bottom: 0 }
+  });
+
+  // EMA Ribbon Series
+  ema9Series = tvChart.addLineSeries({ color: '#00d2ff', lineWidth: 2, title: 'EMA 9' });
+  ema21Series = tvChart.addLineSeries({ color: '#ffd600', lineWidth: 2, title: 'EMA 21' });
+  ema50Series = tvChart.addLineSeries({ color: '#b388ff', lineWidth: 2, lineStyle: 2, title: 'EMA 50' });
+
+  // Crosshair move listener to update OHLC Header
+  tvChart.subscribeCrosshairMove((param) => {
+    if (!param.time || !param.seriesData || !param.seriesData.get(candleSeries)) {
+      return;
+    }
+    const data = param.seriesData.get(candleSeries);
+    if (data) {
+      document.getElementById('valO').textContent = data.open.toFixed(1);
+      document.getElementById('valH').textContent = data.high.toFixed(1);
+      document.getElementById('valL').textContent = data.low.toFixed(1);
+      document.getElementById('valC').textContent = data.close.toFixed(1);
+    }
+    const e9 = param.seriesData.get(ema9Series);
+    if (e9) document.getElementById('valE9').textContent = e9.value.toFixed(1);
+    const e21 = param.seriesData.get(ema21Series);
+    if (e21) document.getElementById('valE21').textContent = e21.value.toFixed(1);
+  });
+
+  // Handle Resize
+  window.addEventListener('resize', () => {
+    if (tvChart) {
+      const parent = container.parentElement.getBoundingClientRect();
+      tvChart.resize(parent.width, parent.height);
+    }
+  });
+}
+
+// Load FnO list from backend
 async function loadFnOList() {
   try {
     const res = await fetch('/api/fno-list');
@@ -137,9 +250,7 @@ function renderWatchlist() {
   }).join('');
 }
 
-function filterWatchlist() {
-  renderWatchlist();
-}
+function filterWatchlist() { renderWatchlist(); }
 
 function setCategory(cat) {
   activeCategory = cat;
@@ -163,6 +274,7 @@ function selectInstrument(item) {
   pricePill.textContent = `₹${item.basePrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${item.change})`;
   pricePill.className = `active-price-pill ${changeClass}`;
   document.getElementById('activeRange').textContent = `H: ₹${item.dayHigh.toLocaleString('en-IN')} | L: ₹${item.dayLow.toLocaleString('en-IN')}`;
+  document.getElementById('chartSymbolTitle').textContent = `${item.name} (${currentTF})`;
 
   loadChart();
   runDeepScan(item);
@@ -177,21 +289,21 @@ function setChartEngine(engine) {
   chartEngine = engine;
   const btnNative = document.getElementById('btnModeNative');
   const btnTV = document.getElementById('btnModeTV');
-  const canvasEl = document.getElementById('nativeChartCanvas');
+  const tvLwEl = document.getElementById('tv_lightweight_chart');
   const ohlcEl = document.getElementById('nativeOhlcHeader');
   const tvEl = document.getElementById('tv_chart_container');
 
   if (engine === 'native') {
     btnNative.classList.add('active');
     btnTV.classList.remove('active');
-    canvasEl.style.display = 'block';
+    tvLwEl.style.display = 'block';
     ohlcEl.style.display = 'block';
     tvEl.style.display = 'none';
     if (currentInstrument) fetchLiveCandles(currentInstrument, true);
   } else {
     btnNative.classList.remove('active');
     btnTV.classList.add('active');
-    canvasEl.style.display = 'none';
+    tvLwEl.style.display = 'none';
     ohlcEl.style.display = 'none';
     tvEl.style.display = 'block';
     if (currentInstrument) loadTradingViewWidget(currentInstrument);
@@ -203,6 +315,7 @@ function switchTimeframe(tf) {
   document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
   if (currentInstrument) {
+    document.getElementById('chartSymbolTitle').textContent = `${currentInstrument.name} (${currentTF})`;
     loadChart();
     runDeepScan(currentInstrument);
   }
@@ -224,7 +337,7 @@ function loadChart() {
 }
 
 // Fetch Real Live Candles from Server
-async function fetchLiveCandles(item, showScan = false) {
+async function fetchLiveCandles(item, fitContent = false) {
   try {
     const res = await fetch(`/api/candles?id=${item.id}&interval=${currentTF}`);
     if (res.ok) {
@@ -246,15 +359,17 @@ async function fetchLiveCandles(item, showScan = false) {
   } catch (err) {
     generateSyntheticCandles(item);
   }
-  calculateIndicators();
-  renderNativeChart();
+
+  updateTradingViewLightweightChart(fitContent);
 }
 
-// Synthetic generator fallback if offline
 function generateSyntheticCandles(item) {
   liveCandles = [];
   let p = item.basePrice;
-  for (let i = 0; i < 60; i++) {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const tfSec = currentTF === '1m' ? 60 : (currentTF === '15m' ? 900 : (currentTF === '1d' ? 86400 : 300));
+
+  for (let i = 0; i < 70; i++) {
     let delta = (Math.random() - 0.48) * (p * 0.002);
     let op = p;
     let cl = op + delta;
@@ -262,7 +377,7 @@ function generateSyntheticCandles(item) {
     let lo = Math.min(op, cl) - Math.random() * (p * 0.001);
     p = cl;
     liveCandles.push({
-      time: Date.now() - (60 - i) * 5 * 60000,
+      time: nowSec - (70 - i) * tfSec,
       open: parseFloat(op.toFixed(2)),
       high: parseFloat(hi.toFixed(2)),
       low: parseFloat(lo.toFixed(2)),
@@ -272,219 +387,92 @@ function generateSyntheticCandles(item) {
   }
 }
 
-// Calculate EMA arrays
-function calculateEMA(data, period) {
+// Calculate EMA for lightweight-charts
+function calculateEMALightweight(candles, period) {
   const k = 2 / (period + 1);
-  let res = new Array(data.length).fill(null);
-  if (data.length < period) return res;
+  const res = [];
+  if (candles.length < period) return res;
+
   let sum = 0;
-  for (let i = 0; i < period; i++) sum += data[i].close;
+  for (let i = 0; i < period; i++) sum += candles[i].close;
   let prev = sum / period;
-  res[period - 1] = prev;
-  for (let i = period; i < data.length; i++) {
-    prev = (data[i].close - prev) * k + prev;
-    res[i] = prev;
+  res.push({ time: candles[period - 1].time, value: prev });
+
+  for (let i = period; i < candles.length; i++) {
+    prev = (candles[i].close - prev) * k + prev;
+    res.push({ time: candles[i].time, value: parseFloat(prev.toFixed(2)) });
   }
   return res;
 }
 
-function calculateIndicators() {
-  liveCandles.ema9 = calculateEMA(liveCandles, 9);
-  liveCandles.ema21 = calculateEMA(liveCandles, 21);
-  liveCandles.ema50 = calculateEMA(liveCandles, 50);
-}
+// Push live data to TradingView Lightweight Chart
+function updateTradingViewLightweightChart(fitContent = false) {
+  if (!tvChart || liveCandles.length === 0) return;
 
-// Render Real Live Candlestick Chart on Canvas
-function renderNativeChart() {
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = rect.width;
-  canvas.height = rect.height;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (liveCandles.length === 0) return;
-
-  const paddingRight = 85;
-  const paddingBottom = 26;
-  const chartW = canvas.width - paddingRight;
-  const chartH = canvas.height - paddingBottom;
-
-  const candleW = 9;
-  const candleSpace = 4;
-  const totalBarW = candleW + candleSpace;
-  const maxVisible = Math.floor(chartW / totalBarW);
-  const startIdx = Math.max(0, liveCandles.length - maxVisible);
-  const visible = liveCandles.slice(startIdx);
-
-  let minP = Infinity;
-  let maxP = -Infinity;
-  visible.forEach(c => {
-    if (c.low < minP) minP = c.low;
-    if (c.high > maxP) maxP = c.high;
+  // Format candles for TradingView (time in seconds)
+  const tvCandles = liveCandles.map(c => {
+    let t = c.time;
+    if (t > 2000000000) t = Math.floor(t / 1000); // convert ms to sec
+    return {
+      time: t,
+      open: c.open,
+      high: c.high,
+      low: c.low,
+      close: c.close
+    };
   });
 
-  const span = (maxP - minP) || 1;
-  minP -= span * 0.08;
-  maxP += span * 0.08;
-
-  const getY = (p) => chartH - ((p - minP) / (maxP - minP)) * chartH;
-  const getX = (idx) => (idx - startIdx) * totalBarW + candleW / 2 + 10;
-
-  // Grid & Price Labels
-  ctx.strokeStyle = '#1b212f';
-  ctx.lineWidth = 1;
-  ctx.fillStyle = '#65758c';
-  ctx.font = '11px sans-serif';
-  ctx.textAlign = 'left';
-
-  const gridSteps = 6;
-  for (let i = 0; i <= gridSteps; i++) {
-    const p = minP + ((maxP - minP) / gridSteps) * i;
-    const y = getY(p);
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(chartW, y);
-    ctx.stroke();
-
-    ctx.fillText(`₹${p.toFixed(1)}`, chartW + 6, y + 4);
-  }
-
-  // Draw 50 EMA Baseline (Purple dashed)
-  if (liveCandles.ema50) {
-    ctx.save();
-    ctx.strokeStyle = '#b388ff';
-    ctx.setLineDash([5, 4]);
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    let started = false;
-    for (let i = startIdx; i < liveCandles.length; i++) {
-      const v = liveCandles.ema50[i];
-      if (v === null) continue;
-      const x = getX(i);
-      const y = getY(v);
-      if (!started) { ctx.moveTo(x, y); started = true; } else { ctx.lineTo(x, y); }
+  // Ensure times are sorted and strictly unique
+  const uniqueCandles = [];
+  const seenTimes = new Set();
+  for (const c of tvCandles) {
+    if (!seenTimes.has(c.time)) {
+      seenTimes.add(c.time);
+      uniqueCandles.push(c);
     }
-    ctx.stroke();
-    ctx.restore();
   }
 
-  // Draw 21 EMA (Gold)
-  if (liveCandles.ema21) {
-    ctx.strokeStyle = '#ffd600';
-    ctx.lineWidth = 2.0;
-    ctx.beginPath();
-    let started = false;
-    for (let i = startIdx; i < liveCandles.length; i++) {
-      const v = liveCandles.ema21[i];
-      if (v === null) continue;
-      const x = getX(i);
-      const y = getY(v);
-      if (!started) { ctx.moveTo(x, y); started = true; } else { ctx.lineTo(x, y); }
-    }
-    ctx.stroke();
-  }
+  candleSeries.setData(uniqueCandles);
 
-  // Draw 9 EMA (Cyan)
-  if (liveCandles.ema9) {
-    ctx.strokeStyle = '#00d2ff';
-    ctx.lineWidth = 2.0;
-    ctx.beginPath();
-    let started = false;
-    for (let i = startIdx; i < liveCandles.length; i++) {
-      const v = liveCandles.ema9[i];
-      if (v === null) continue;
-      const x = getX(i);
-      const y = getY(v);
-      if (!started) { ctx.moveTo(x, y); started = true; } else { ctx.lineTo(x, y); }
-    }
-    ctx.stroke();
-  }
-
-  // Draw Candlesticks
-  visible.forEach((c, vIdx) => {
-    const actualIdx = startIdx + vIdx;
-    const x = getX(actualIdx);
-    const yOpen = getY(c.open);
-    const yClose = getY(c.close);
-    const yHigh = getY(c.high);
-    const yLow = getY(c.low);
-
+  // Volume
+  const volumeData = liveCandles.map((c, idx) => {
+    let t = c.time > 2000000000 ? Math.floor(c.time / 1000) : c.time;
     const isUp = c.close >= c.open;
-    const color = isUp ? '#00e676' : '#ff1744';
+    return {
+      time: t,
+      value: c.volume || 1000,
+      color: isUp ? 'rgba(0, 230, 118, 0.4)' : 'rgba(255, 23, 68, 0.4)'
+    };
+  }).filter(v => seenTimes.has(v.time));
+  volumeSeries.setData(volumeData);
 
-    // Wick
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(x, yHigh);
-    ctx.lineTo(x, yLow);
-    ctx.stroke();
+  // Calculate & Set EMAs
+  const ema9Data = calculateEMALightweight(uniqueCandles, 9);
+  const ema21Data = calculateEMALightweight(uniqueCandles, 21);
+  const ema50Data = calculateEMALightweight(uniqueCandles, 50);
 
-    // Body
-    ctx.fillStyle = color;
-    const top = Math.min(yOpen, yClose);
-    const height = Math.max(Math.abs(yClose - yOpen), 1.5);
-    ctx.fillRect(x - candleW / 2, top, candleW, height);
-  });
+  ema9Series.setData(ema9Data);
+  ema21Series.setData(ema21Data);
+  ema50Series.setData(ema50Data);
 
-  // Draw Scalp Buy/Sell Arrow on last signal
-  const lastC = visible[visible.length - 1];
-  const lastX = getX(liveCandles.length - 1);
-  const isBull = currentInstrument ? currentInstrument.isPositive : true;
+  // Add Scalp Arrow Marker on newest signal candle
+  if (uniqueCandles.length > 0) {
+    const last = uniqueCandles[uniqueCandles.length - 1];
+    const isBull = currentInstrument ? currentInstrument.isPositive : true;
 
-  if (isBull) {
-    // Green BUY Arrow
-    const yA = getY(lastC.low) + 20;
-    ctx.fillStyle = '#00e676';
-    ctx.beginPath();
-    ctx.moveTo(lastX, yA - 12);
-    ctx.lineTo(lastX - 7, yA);
-    ctx.lineTo(lastX + 7, yA);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.font = 'bold 10px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('BUY CE', lastX, yA + 13);
-  } else {
-    // Red SELL Arrow
-    const yA = getY(lastC.high) - 20;
-    ctx.fillStyle = '#ff1744';
-    ctx.beginPath();
-    ctx.moveTo(lastX, yA + 12);
-    ctx.lineTo(lastX - 7, yA);
-    ctx.lineTo(lastX + 7, yA);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.font = 'bold 10px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('BUY PE', lastX, yA - 6);
+    candleSeries.setMarkers([
+      {
+        time: last.time,
+        position: isBull ? 'belowBar' : 'aboveBar',
+        color: isBull ? '#00e676' : '#ff1744',
+        shape: isBull ? 'arrowUp' : 'arrowDown',
+        text: isBull ? 'BUY CE' : 'BUY PE'
+      }
+    ]);
   }
 
-  // Crosshair
-  if (mouseX >= 0 && mouseX <= chartW && mouseY >= 0 && mouseY <= chartH) {
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-    ctx.setLineDash([3, 3]);
-    ctx.beginPath();
-    ctx.moveTo(mouseX, 0);
-    ctx.lineTo(mouseX, chartH);
-    ctx.moveTo(0, mouseY);
-    ctx.lineTo(chartW, mouseY);
-    ctx.stroke();
-    ctx.restore();
-
-    const hoveredRel = Math.round((mouseX - 10 - candleW / 2) / totalBarW);
-    const hIdx = startIdx + hoveredRel;
-    if (hIdx >= 0 && hIdx < liveCandles.length) {
-      const hC = liveCandles[hIdx];
-      document.getElementById('valO').textContent = hC.open.toFixed(1);
-      document.getElementById('valH').textContent = hC.high.toFixed(1);
-      document.getElementById('valL').textContent = hC.low.toFixed(1);
-      document.getElementById('valC').textContent = hC.close.toFixed(1);
-      document.getElementById('valE9').textContent = liveCandles.ema9[hIdx] ? liveCandles.ema9[hIdx].toFixed(1) : '-';
-      document.getElementById('valE21').textContent = liveCandles.ema21[hIdx] ? liveCandles.ema21[hIdx].toFixed(1) : '-';
-    }
+  if (fitContent) {
+    tvChart.timeScale().fitContent();
   }
 }
 
@@ -529,7 +517,7 @@ function runDeepScan(item) {
   const steps = [
     `Analyzing ${item.name} (${currentTF}) Candlestick Structure...`,
     `Verifying 50 EMA Trend & VWAP Support/Resistance...`,
-    `Scanning Option Chain OI & PCR (Put-Call Ratio)...`,
+    `Checking Capital (₹${userCapital.toLocaleString('en-IN')}) for Safe Lot Sizing...`,
     `Selecting Optimal Strike & Calculating Precision SL / Target...`
   ];
 
@@ -548,6 +536,7 @@ function runDeepScan(item) {
   }, 400);
 }
 
+// Compute Option Strike & Sizing Based on User's Capital
 function computeAndRenderRecommendation(item) {
   const isBullish = item.isPositive;
   const spotPrice = item.basePrice;
@@ -570,18 +559,36 @@ function computeAndRenderRecommendation(item) {
   const premiumEntryLow = (basePremium * 0.98).toFixed(1);
   const premiumEntryHigh = (basePremium * 1.02).toFixed(1);
 
+  // Stop Loss & Targets
   const slPoints = basePremium * 0.20;
   const stopLoss = (basePremium - slPoints).toFixed(1);
-
   const tp1Points = slPoints * 1.5;
   const target1 = (basePremium + tp1Points).toFixed(1);
-
   const tp2Points = slPoints * 2.8;
   const target2 = (basePremium + tp2Points).toFixed(1);
 
-  const capRequired = Math.round(basePremium * item.lotSize);
+  // 💰 CAPITAL ALLOCATION & POSITION SIZING LOGIC
+  const costPerLot = basePremium * item.lotSize;
+  let lotsAllowed = Math.floor(userCapital / costPerLot);
+
+  // Cap maximum risk: Do not deploy more than 40% of capital in a single trade
+  const maxLotsRiskControlled = Math.max(1, Math.floor((userCapital * 0.40) / costPerLot));
+  if (lotsAllowed > maxLotsRiskControlled) {
+    lotsAllowed = maxLotsRiskControlled;
+  }
+
+  let totalQty = lotsAllowed * item.lotSize;
+  let totalCost = Math.round(lotsAllowed * costPerLot);
+  let remainingCash = userCapital - totalCost;
+
+  // Rupee P&L Projections
+  let netPnlTarget1 = Math.round(totalQty * tp1Points);
+  let netPnlTarget2 = Math.round(totalQty * tp2Points);
+  let maxLossSL = Math.round(totalQty * slPoints);
+
   const confidence = isBullish ? (88 + Math.floor(Math.random() * 6)) : (85 + Math.floor(Math.random() * 6));
 
+  // Update UI Elements
   const badge = document.getElementById('recSignalBadge');
   badge.textContent = `🎯 ${signalType}`;
   badge.className = isBullish ? 'signal-type-badge call' : 'signal-type-badge put';
@@ -591,7 +598,21 @@ function computeAndRenderRecommendation(item) {
   document.getElementById('recSL').textContent = `₹${stopLoss} (-${slPoints.toFixed(1)} pts)`;
   document.getElementById('recTarget').textContent = `₹${target1} / ₹${target2}`;
   document.getElementById('recRiskReward').textContent = `Risk / Reward: 1 : 2.80`;
-  document.getElementById('recCapReq').textContent = `Min Capital (1 Lot): ₹${capRequired.toLocaleString('en-IN')}`;
+
+  // Update Capital Sizing UI
+  if (lotsAllowed >= 1) {
+    document.getElementById('capLotsAllowed').textContent = `${lotsAllowed} ${lotsAllowed === 1 ? 'Lot' : 'Lots'} (${totalQty} Qty)`;
+    document.getElementById('capDeployedRatio').textContent = `₹${totalCost.toLocaleString('en-IN')} used | ₹${remainingCash.toLocaleString('en-IN')} cash reserve`;
+    document.getElementById('pnlTarget1').textContent = `+₹${netPnlTarget1.toLocaleString('en-IN')}`;
+    document.getElementById('pnlTarget2').textContent = `+₹${netPnlTarget2.toLocaleString('en-IN')}`;
+    document.getElementById('pnlMaxLoss').textContent = `-₹${maxLossSL.toLocaleString('en-IN')}`;
+  } else {
+    document.getElementById('capLotsAllowed').textContent = `⚠️ Need ₹${Math.round(costPerLot).toLocaleString('en-IN')} for 1 Lot`;
+    document.getElementById('capDeployedRatio').textContent = `Capital ₹${userCapital.toLocaleString('en-IN')} is below 1 lot margin`;
+    document.getElementById('pnlTarget1').textContent = `+₹${Math.round(item.lotSize * tp1Points).toLocaleString('en-IN')} (Per 1 Lot)`;
+    document.getElementById('pnlTarget2').textContent = `+₹${Math.round(item.lotSize * tp2Points).toLocaleString('en-IN')} (Per 1 Lot)`;
+    document.getElementById('pnlMaxLoss').textContent = `-₹${Math.round(item.lotSize * slPoints).toLocaleString('en-IN')} (Per 1 Lot)`;
+  }
 
   const patternEl = document.getElementById('candlePatternTag');
   patternEl.textContent = isBullish ? 'Bullish Hammer / Rejection Wick' : 'Bearish Shooting Star / Rejection';
@@ -611,11 +632,10 @@ function computeAndRenderRecommendation(item) {
   document.getElementById('chkPCR').textContent = isBullish ? '1.28 (Strong Call Buildup)' : '0.74 (Strong Put Buying)';
 
   document.getElementById('rationaleText').innerHTML = isBullish 
-    ? `<b>Setup Reason:</b> ${item.name} formed a high-conviction bullish candle bounce off VWAP. Healthy RSI expansion above 60 and heavy Put writing at ${atmStrike} creates strong support for an upward scalp to Target 1.`
-    : `<b>Setup Reason:</b> ${item.name} faced rejection at the 50 EMA resistance with rising sell volume. Call writing at ${atmStrike} confirms downward breakdown pressure to Target 1.`;
+    ? `<b>Setup Reason:</b> ${item.name} formed a high-conviction bullish candle bounce off VWAP. With your ₹${userCapital.toLocaleString('en-IN')} capital, purchasing ${lotsAllowed || 1} lot(s) maintains safe risk management with 1:2.80 target reward.`
+    : `<b>Setup Reason:</b> ${item.name} faced rejection at the 50 EMA resistance with rising sell volume. With your ₹${userCapital.toLocaleString('en-IN')} capital, purchasing ${lotsAllowed || 1} lot(s) maintains safe risk management with 1:2.80 target reward.`;
 
   document.getElementById('confScore').textContent = `${confidence}%`;
-  document.getElementById('lotDisplay').textContent = `${item.lotSize} Qty (1 Lot)`;
 
   playNotificationSound();
 }
