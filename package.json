@@ -1,0 +1,16 @@
+{
+  "name": "indian-fno-sniper",
+  "version": "1.0.0",
+  "description": "Secret Indian FnO Trade Finder, Auto-Scanner & Option Chain Terminal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  },
+  "keywords": ["fno", "nifty", "banknifty", "tradingview", "options", "indian-market"],
+  "author": "Secret",
+  "license": "ISC"
+}
