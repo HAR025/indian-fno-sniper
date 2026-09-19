@@ -66,7 +66,18 @@
           <div style="font-size: 0.78rem; color: var(--text-muted);" id="activeRange">H: ₹25,480.00 | L: ₹25,310.20</div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          
+          <!-- Feed Mode Selector to bypass TradingView embed restrictions -->
+          <div style="display: flex; align-items: center; gap: 4px; background: var(--bg-card); padding: 2px 6px; border-radius: 5px; border: 1px solid var(--border-color);">
+            <span style="font-size: 0.7rem; color: var(--text-dim);">Feed:</span>
+            <select id="feedSelector" onchange="changeFeedMode(this.value)" style="background: transparent; color: var(--blue); border: none; font-size: 0.75rem; font-weight: 700; outline: none; cursor: pointer;">
+              <option value="tvSymbol" style="background:#111622; color:#fff;">Live Real-Time Feed</option>
+              <option value="etfSymbol" style="background:#111622; color:#fff;">NSE BeES ETF Feed</option>
+              <option value="officialSymbol" style="background:#111622; color:#fff;">Official NSE Index</option>
+            </select>
+          </div>
+
           <div class="tf-selector">
             <span style="font-size: 0.72rem; color: var(--text-dim); margin-right: 4px;">TF:</span>
             <button class="tf-btn" onclick="switchTimeframe('1')">1m</button>
@@ -75,8 +86,14 @@
             <button class="tf-btn" onclick="switchTimeframe('15')">15m</button>
             <button class="tf-btn" onclick="switchTimeframe('D')">1D</button>
           </div>
+
+          <!-- Direct TradingView Official Pop-out Button -->
+          <button class="btn" style="background: #1e2638; border: 1px solid #36425a; color: #fff; font-size: 0.75rem; padding: 5px 10px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 4px;" onclick="openInTradingViewTab()" title="Open official NSE chart on TradingView.com">
+            <span>↗️</span> Official Chart
+          </button>
+
           <button class="btn-scan-now" onclick="triggerDeepScan()">
-            <span>🔍</span> Re-Scan Candles
+            <span>🔍</span> Re-Scan
           </button>
         </div>
       </div>
@@ -127,7 +144,7 @@
             </div>
 
             <div class="rec-footer">
-              <span id="recRiskReward">Risk / Reward: 1 : 2.50</span>
+              <span id="recRiskReward">Risk / Reward: 1 : 2.80</span>
               <span id="recCapReq">Min Capital (1 Lot): ₹3,425</span>
             </div>
           </div>
@@ -163,7 +180,7 @@
               <div class="check-item">
                 <span class="check-icon">🎯</span>
                 <span class="check-text">Day High/Low:</span>
-                <span class="check-val up" id="chkDayHL">Breaking Near Day High</span>
+                <span class="check-val up" id="chkDayHL">Near Day High</span>
               </div>
               <div class="check-item">
                 <span class="check-icon">📊</span>

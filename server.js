@@ -10,11 +10,16 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Master Indian FnO Instruments Database
+// tvSymbol: optimized for TradingView Widget without NSE embed block
+// officialSymbol: for opening directly on TradingView official website
 const FNO_INSTRUMENTS = [
   {
     id: 'nifty',
     name: 'NIFTY 50',
     symbol: 'NSE:NIFTY',
+    tvSymbol: 'CAPITALCOM:NIFTY50',
+    etfSymbol: 'NSE:NIFTYBEES',
+    officialSymbol: 'NSE:NIFTY',
     category: 'Index',
     basePrice: 25420.50,
     lotSize: 25,
@@ -28,6 +33,9 @@ const FNO_INSTRUMENTS = [
     id: 'banknifty',
     name: 'BANK NIFTY',
     symbol: 'NSE:BANKNIFTY',
+    tvSymbol: 'CAPITALCOM:BANKNIFTY',
+    etfSymbol: 'NSE:BANKBEES',
+    officialSymbol: 'NSE:BANKNIFTY',
     category: 'Index',
     basePrice: 52940.80,
     lotSize: 15,
@@ -38,9 +46,28 @@ const FNO_INSTRUMENTS = [
     dayLow: 52650.00
   },
   {
+    id: 'sensex',
+    name: 'BSE SENSEX',
+    symbol: 'BSE:SENSEX',
+    tvSymbol: 'BSE:SENSEX',
+    etfSymbol: 'BSE:SENSEX',
+    officialSymbol: 'BSE:SENSEX',
+    category: 'Index',
+    basePrice: 83180.20,
+    lotSize: 10,
+    strikeStep: 100,
+    change: '+0.72%',
+    isPositive: true,
+    dayHigh: 83350.00,
+    dayLow: 82890.00
+  },
+  {
     id: 'finnifty',
     name: 'FIN NIFTY',
     symbol: 'NSE:FINNIFTY',
+    tvSymbol: 'CAPITALCOM:FINNIFTY',
+    etfSymbol: 'NSE:NIFTYBEES',
+    officialSymbol: 'NSE:FINNIFTY',
     category: 'Index',
     basePrice: 24150.30,
     lotSize: 25,
@@ -54,6 +81,9 @@ const FNO_INSTRUMENTS = [
     id: 'midcpnifty',
     name: 'MIDCAP NIFTY',
     symbol: 'NSE:MIDCPNIFTY',
+    tvSymbol: 'CAPITALCOM:NIFTY50',
+    etfSymbol: 'NSE:NIFTYBEES',
+    officialSymbol: 'NSE:MIDCPNIFTY',
     category: 'Index',
     basePrice: 13240.60,
     lotSize: 50,
@@ -64,22 +94,12 @@ const FNO_INSTRUMENTS = [
     dayLow: 13190.00
   },
   {
-    id: 'sensex',
-    name: 'BSE SENSEX',
-    symbol: 'BSE:SENSEX',
-    category: 'Index',
-    basePrice: 83180.20,
-    lotSize: 10,
-    strikeStep: 100,
-    change: '+0.72%',
-    isPositive: true,
-    dayHigh: 83350.00,
-    dayLow: 82890.00
-  },
-  {
     id: 'reliance',
     name: 'RELIANCE',
-    symbol: 'NSE:RELIANCE',
+    symbol: 'BSE:RELIANCE',
+    tvSymbol: 'BSE:RELIANCE',
+    etfSymbol: 'NSE:RELIANCE',
+    officialSymbol: 'NSE:RELIANCE',
     category: 'Stock',
     basePrice: 2985.40,
     lotSize: 250,
@@ -92,7 +112,10 @@ const FNO_INSTRUMENTS = [
   {
     id: 'hdfcbank',
     name: 'HDFC BANK',
-    symbol: 'NSE:HDFCBANK',
+    symbol: 'BSE:HDFCBANK',
+    tvSymbol: 'BSE:HDFCBANK',
+    etfSymbol: 'NSE:HDFCBANK',
+    officialSymbol: 'NSE:HDFCBANK',
     category: 'Stock',
     basePrice: 1675.20,
     lotSize: 550,
@@ -105,7 +128,10 @@ const FNO_INSTRUMENTS = [
   {
     id: 'icicibank',
     name: 'ICICI BANK',
-    symbol: 'NSE:ICICIBANK',
+    symbol: 'BSE:ICICIBANK',
+    tvSymbol: 'BSE:ICICIBANK',
+    etfSymbol: 'NSE:ICICIBANK',
+    officialSymbol: 'NSE:ICICIBANK',
     category: 'Stock',
     basePrice: 1245.80,
     lotSize: 700,
@@ -118,7 +144,10 @@ const FNO_INSTRUMENTS = [
   {
     id: 'tatamotors',
     name: 'TATA MOTORS',
-    symbol: 'NSE:TATAMOTORS',
+    symbol: 'BSE:TATAMOTORS',
+    tvSymbol: 'BSE:TATAMOTORS',
+    etfSymbol: 'NSE:TATAMOTORS',
+    officialSymbol: 'NSE:TATAMOTORS',
     category: 'Stock',
     basePrice: 978.60,
     lotSize: 1425,
@@ -131,7 +160,10 @@ const FNO_INSTRUMENTS = [
   {
     id: 'tcs',
     name: 'TCS',
-    symbol: 'NSE:TCS',
+    symbol: 'BSE:TCS',
+    tvSymbol: 'BSE:TCS',
+    etfSymbol: 'NSE:TCS',
+    officialSymbol: 'NSE:TCS',
     category: 'Stock',
     basePrice: 4290.00,
     lotSize: 175,
@@ -144,7 +176,10 @@ const FNO_INSTRUMENTS = [
   {
     id: 'infy',
     name: 'INFOSYS',
-    symbol: 'NSE:INFY',
+    symbol: 'BSE:INFY',
+    tvSymbol: 'BSE:INFY',
+    etfSymbol: 'NSE:INFY',
+    officialSymbol: 'NSE:INFY',
     category: 'Stock',
     basePrice: 1912.30,
     lotSize: 400,
@@ -157,7 +192,10 @@ const FNO_INSTRUMENTS = [
   {
     id: 'sbin',
     name: 'SBI (SBIN)',
-    symbol: 'NSE:SBIN',
+    symbol: 'BSE:SBIN',
+    tvSymbol: 'BSE:SBIN',
+    etfSymbol: 'NSE:SBIN',
+    officialSymbol: 'NSE:SBIN',
     category: 'Stock',
     basePrice: 792.40,
     lotSize: 1500,
@@ -170,7 +208,10 @@ const FNO_INSTRUMENTS = [
   {
     id: 'bajfinance',
     name: 'BAJAJ FINANCE',
-    symbol: 'NSE:BAJFINANCE',
+    symbol: 'BSE:BAJFINANCE',
+    tvSymbol: 'BSE:BAJFINANCE',
+    etfSymbol: 'NSE:BAJFINANCE',
+    officialSymbol: 'NSE:BAJFINANCE',
     category: 'Stock',
     basePrice: 7540.00,
     lotSize: 125,
@@ -183,7 +224,10 @@ const FNO_INSTRUMENTS = [
   {
     id: 'bhartiartl',
     name: 'BHARTI AIRTEL',
-    symbol: 'NSE:BHARTIARTL',
+    symbol: 'BSE:BHARTIARTL',
+    tvSymbol: 'BSE:BHARTIARTL',
+    etfSymbol: 'NSE:BHARTIARTL',
+    officialSymbol: 'NSE:BHARTIARTL',
     category: 'Stock',
     basePrice: 1650.00,
     lotSize: 475,
@@ -195,7 +239,6 @@ const FNO_INSTRUMENTS = [
   }
 ];
 
-// Endpoint to get all Indian FnO instruments
 app.get('/api/fno-list', (req, res) => {
   res.json({
     status: 'success',
@@ -204,7 +247,6 @@ app.get('/api/fno-list', (req, res) => {
   });
 });
 
-// Fallback route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

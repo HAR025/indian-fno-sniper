@@ -4,27 +4,27 @@ let fnoInstruments = [];
 let currentInstrument = null;
 let currentTF = '5';
 let activeCategory = 'all';
-let tvWidget = null;
+let currentFeedKey = 'tvSymbol'; // 'tvSymbol', 'etfSymbol', 'officialSymbol'
 
-// Fallback Instruments Database
+// Fallback Instruments Database with Optimized Feeds
 const DEFAULT_INSTRUMENTS = [
-  { id: 'nifty', name: 'NIFTY 50', symbol: 'NSE:NIFTY', category: 'Index', basePrice: 25420.50, lotSize: 25, strikeStep: 50, change: '+0.68%', isPositive: true, dayHigh: 25480.00, dayLow: 25310.20 },
-  { id: 'banknifty', name: 'BANK NIFTY', symbol: 'NSE:BANKNIFTY', category: 'Index', basePrice: 52940.80, lotSize: 15, strikeStep: 100, change: '+1.12%', isPositive: true, dayHigh: 53120.00, dayLow: 52650.00 },
-  { id: 'finnifty', name: 'FIN NIFTY', symbol: 'NSE:FINNIFTY', category: 'Index', basePrice: 24150.30, lotSize: 25, strikeStep: 50, change: '+0.54%', isPositive: true, dayHigh: 24220.00, dayLow: 24080.00 },
-  { id: 'midcpnifty', name: 'MIDCAP NIFTY', symbol: 'NSE:MIDCPNIFTY', category: 'Index', basePrice: 13240.60, lotSize: 50, strikeStep: 25, change: '-0.22%', isPositive: false, dayHigh: 13310.00, dayLow: 13190.00 },
-  { id: 'sensex', name: 'BSE SENSEX', symbol: 'BSE:SENSEX', category: 'Index', basePrice: 83180.20, lotSize: 10, strikeStep: 100, change: '+0.72%', isPositive: true, dayHigh: 83350.00, dayLow: 82890.00 },
-  { id: 'reliance', name: 'RELIANCE', symbol: 'NSE:RELIANCE', category: 'Stock', basePrice: 2985.40, lotSize: 250, strikeStep: 20, change: '+1.45%', isPositive: true, dayHigh: 3010.00, dayLow: 2955.00 },
-  { id: 'hdfcbank', name: 'HDFC BANK', symbol: 'NSE:HDFCBANK', category: 'Stock', basePrice: 1675.20, lotSize: 550, strikeStep: 10, change: '+0.95%', isPositive: true, dayHigh: 1688.00, dayLow: 1662.00 },
-  { id: 'icicibank', name: 'ICICI BANK', symbol: 'NSE:ICICIBANK', category: 'Stock', basePrice: 1245.80, lotSize: 700, strikeStep: 10, change: '+1.20%', isPositive: true, dayHigh: 1255.00, dayLow: 1232.00 },
-  { id: 'tatamotors', name: 'TATA MOTORS', symbol: 'NSE:TATAMOTORS', category: 'Stock', basePrice: 978.60, lotSize: 1425, strikeStep: 10, change: '-0.85%', isPositive: false, dayHigh: 992.00, dayLow: 971.00 },
-  { id: 'tcs', name: 'TCS', symbol: 'NSE:TCS', category: 'Stock', basePrice: 4290.00, lotSize: 175, strikeStep: 50, change: '+0.40%', isPositive: true, dayHigh: 4320.00, dayLow: 4265.00 },
-  { id: 'infy', name: 'INFOSYS', symbol: 'NSE:INFY', category: 'Stock', basePrice: 1912.30, lotSize: 400, strikeStep: 20, change: '-0.35%', isPositive: false, dayHigh: 1930.00, dayLow: 1898.00 },
-  { id: 'sbin', name: 'SBI (SBIN)', symbol: 'NSE:SBIN', category: 'Stock', basePrice: 792.40, lotSize: 1500, strikeStep: 5, change: '+1.05%', isPositive: true, dayHigh: 798.50, dayLow: 785.00 },
-  { id: 'bajfinance', name: 'BAJAJ FINANCE', symbol: 'NSE:BAJFINANCE', category: 'Stock', basePrice: 7540.00, lotSize: 125, strikeStep: 50, change: '+1.80%', isPositive: true, dayHigh: 7590.00, dayLow: 7420.00 },
-  { id: 'bhartiartl', name: 'BHARTI AIRTEL', symbol: 'NSE:BHARTIARTL', category: 'Stock', basePrice: 1650.00, lotSize: 475, strikeStep: 10, change: '+0.30%', isPositive: true, dayHigh: 1665.00, dayLow: 1640.00 }
+  { id: 'nifty', name: 'NIFTY 50', symbol: 'NSE:NIFTY', tvSymbol: 'CAPITALCOM:NIFTY50', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:NIFTY', category: 'Index', basePrice: 25420.50, lotSize: 25, strikeStep: 50, change: '+0.68%', isPositive: true, dayHigh: 25480.00, dayLow: 25310.20 },
+  { id: 'banknifty', name: 'BANK NIFTY', symbol: 'NSE:BANKNIFTY', tvSymbol: 'CAPITALCOM:BANKNIFTY', etfSymbol: 'NSE:BANKBEES', officialSymbol: 'NSE:BANKNIFTY', category: 'Index', basePrice: 52940.80, lotSize: 15, strikeStep: 100, change: '+1.12%', isPositive: true, dayHigh: 53120.00, dayLow: 52650.00 },
+  { id: 'sensex', name: 'BSE SENSEX', symbol: 'BSE:SENSEX', tvSymbol: 'BSE:SENSEX', etfSymbol: 'BSE:SENSEX', officialSymbol: 'BSE:SENSEX', category: 'Index', basePrice: 83180.20, lotSize: 10, strikeStep: 100, change: '+0.72%', isPositive: true, dayHigh: 83350.00, dayLow: 82890.00 },
+  { id: 'finnifty', name: 'FIN NIFTY', symbol: 'NSE:FINNIFTY', tvSymbol: 'CAPITALCOM:FINNIFTY', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:FINNIFTY', category: 'Index', basePrice: 24150.30, lotSize: 25, strikeStep: 50, change: '+0.54%', isPositive: true, dayHigh: 24220.00, dayLow: 24080.00 },
+  { id: 'midcpnifty', name: 'MIDCAP NIFTY', symbol: 'NSE:MIDCPNIFTY', tvSymbol: 'CAPITALCOM:NIFTY50', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:MIDCPNIFTY', category: 'Index', basePrice: 13240.60, lotSize: 50, strikeStep: 25, change: '-0.22%', isPositive: false, dayHigh: 13310.00, dayLow: 13190.00 },
+  { id: 'reliance', name: 'RELIANCE', symbol: 'BSE:RELIANCE', tvSymbol: 'BSE:RELIANCE', etfSymbol: 'NSE:RELIANCE', officialSymbol: 'NSE:RELIANCE', category: 'Stock', basePrice: 2985.40, lotSize: 250, strikeStep: 20, change: '+1.45%', isPositive: true, dayHigh: 3010.00, dayLow: 2955.00 },
+  { id: 'hdfcbank', name: 'HDFC BANK', symbol: 'BSE:HDFCBANK', tvSymbol: 'BSE:HDFCBANK', etfSymbol: 'NSE:HDFCBANK', officialSymbol: 'NSE:HDFCBANK', category: 'Stock', basePrice: 1675.20, lotSize: 550, strikeStep: 10, change: '+0.95%', isPositive: true, dayHigh: 1688.00, dayLow: 1662.00 },
+  { id: 'icicibank', name: 'ICICI BANK', symbol: 'BSE:ICICIBANK', tvSymbol: 'BSE:ICICIBANK', etfSymbol: 'NSE:ICICIBANK', officialSymbol: 'NSE:ICICIBANK', category: 'Stock', basePrice: 1245.80, lotSize: 700, strikeStep: 10, change: '+1.20%', isPositive: true, dayHigh: 1255.00, dayLow: 1232.00 },
+  { id: 'tatamotors', name: 'TATA MOTORS', symbol: 'BSE:TATAMOTORS', tvSymbol: 'BSE:TATAMOTORS', etfSymbol: 'NSE:TATAMOTORS', officialSymbol: 'NSE:TATAMOTORS', category: 'Stock', basePrice: 978.60, lotSize: 1425, strikeStep: 10, change: '-0.85%', isPositive: false, dayHigh: 992.00, dayLow: 971.00 },
+  { id: 'tcs', name: 'TCS', symbol: 'BSE:TCS', tvSymbol: 'BSE:TCS', etfSymbol: 'NSE:TCS', officialSymbol: 'NSE:TCS', category: 'Stock', basePrice: 4290.00, lotSize: 175, strikeStep: 50, change: '+0.40%', isPositive: true, dayHigh: 4320.00, dayLow: 4265.00 },
+  { id: 'infy', name: 'INFOSYS', symbol: 'BSE:INFY', tvSymbol: 'BSE:INFY', etfSymbol: 'NSE:INFY', officialSymbol: 'NSE:INFY', category: 'Stock', basePrice: 1912.30, lotSize: 400, strikeStep: 20, change: '-0.35%', isPositive: false, dayHigh: 1930.00, dayLow: 1898.00 },
+  { id: 'sbin', name: 'SBI (SBIN)', symbol: 'BSE:SBIN', tvSymbol: 'BSE:SBIN', etfSymbol: 'NSE:SBIN', officialSymbol: 'NSE:SBIN', category: 'Stock', basePrice: 792.40, lotSize: 1500, strikeStep: 5, change: '+1.05%', isPositive: true, dayHigh: 798.50, dayLow: 785.00 },
+  { id: 'bajfinance', name: 'BAJAJ FINANCE', symbol: 'BSE:BAJFINANCE', tvSymbol: 'BSE:BAJFINANCE', etfSymbol: 'NSE:BAJFINANCE', officialSymbol: 'NSE:BAJFINANCE', category: 'Stock', basePrice: 7540.00, lotSize: 125, strikeStep: 50, change: '+1.80%', isPositive: true, dayHigh: 7590.00, dayLow: 7420.00 },
+  { id: 'bhartiartl', name: 'BHARTI AIRTEL', symbol: 'BSE:BHARTIARTL', tvSymbol: 'BSE:BHARTIARTL', etfSymbol: 'NSE:BHARTIARTL', officialSymbol: 'NSE:BHARTIARTL', category: 'Stock', basePrice: 1650.00, lotSize: 475, strikeStep: 10, change: '+0.30%', isPositive: true, dayHigh: 1665.00, dayLow: 1640.00 }
 ];
 
-// Initialize application
+// Initialize
 window.addEventListener('DOMContentLoaded', async () => {
   startISTClock();
   await loadFnOList();
@@ -123,7 +123,6 @@ function selectInstrument(item) {
   currentInstrument = item;
   renderWatchlist();
 
-  // Update Toolbar Header
   document.getElementById('activeName').textContent = item.name;
   const changeClass = item.isPositive ? 'up' : 'down';
   const pricePill = document.getElementById('activePricePill');
@@ -131,14 +130,10 @@ function selectInstrument(item) {
   pricePill.className = `active-price-pill ${changeClass}`;
   document.getElementById('activeRange').textContent = `H: ₹${item.dayHigh.toLocaleString('en-IN')} | L: ₹${item.dayLow.toLocaleString('en-IN')}`;
 
-  // Load TradingView Chart
-  loadTradingViewChart(item.symbol, currentTF);
-
-  // Run deep scan
+  loadChartForCurrentSelection();
   runDeepScan(item);
 }
 
-// "Find Trade" action button handler
 function findTradeFor(id) {
   const item = fnoInstruments.find(x => x.id === id);
   if (item) {
@@ -146,12 +141,31 @@ function findTradeFor(id) {
   }
 }
 
+// Change Feed Mode (Live Real-Time / ETF / Official)
+function changeFeedMode(mode) {
+  currentFeedKey = mode;
+  loadChartForCurrentSelection();
+}
+
+// Open official chart directly in new tab on TradingView
+function openInTradingViewTab() {
+  if (!currentInstrument) return;
+  const symbol = currentInstrument.officialSymbol || currentInstrument.symbol || 'NSE:NIFTY';
+  window.open(`https://in.tradingview.com/chart/?symbol=${encodeURIComponent(symbol)}`, '_blank');
+}
+
+// Load chart using selected feed symbol
+function loadChartForCurrentSelection() {
+  if (!currentInstrument) return;
+  let sym = currentInstrument[currentFeedKey] || currentInstrument.tvSymbol || currentInstrument.symbol;
+  loadTradingViewChart(sym, currentTF);
+}
+
 // Load Official TradingView Chart Widget
 function loadTradingViewChart(symbol, interval) {
   const container = document.getElementById('tv_chart_container');
-  container.innerHTML = ''; // reset
+  container.innerHTML = '';
 
-  // Map timeframe to TradingView format
   let tvInterval = interval;
   if (interval === 'D') tvInterval = 'D';
 
@@ -182,7 +196,7 @@ function switchTimeframe(tf) {
   document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
   if (currentInstrument) {
-    loadTradingViewChart(currentInstrument.symbol, currentTF);
+    loadChartForCurrentSelection();
     runDeepScan(currentInstrument);
   }
 }
@@ -227,16 +241,11 @@ function computeAndRenderRecommendation(item) {
   const spotPrice = item.basePrice;
   const step = item.strikeStep;
 
-  // Calculate ATM strike
   let atmStrike = Math.round(spotPrice / step) * step;
-
-  // Strike Selection: For BUY CE, take ATM or slight ITM; for BUY PE, take ATM or slight ITM
   let strikeChoice = atmStrike;
   let signalType = isBullish ? 'BUY CALL (CE)' : 'BUY PUT (PE)';
   let strikeSymbol = isBullish ? `${item.name} ${strikeChoice} CE` : `${item.name} ${strikeChoice} PE`;
 
-  // Estimate Option Premium Price dynamically
-  // Typical Nifty ATM premium ~ 130-160, BankNifty ~ 320-450, Stocks ~ 25-60
   let basePremium = 135.0;
   if (item.id === 'banknifty') basePremium = 360.0;
   else if (item.id === 'sensex') basePremium = 410.0;
@@ -246,27 +255,21 @@ function computeAndRenderRecommendation(item) {
     basePremium = Math.max(18, Math.round((spotPrice * 0.022) / 0.5) * 0.5);
   }
 
-  // Generate realistic slight variation
   const premiumEntryLow = (basePremium * 0.98).toFixed(1);
   const premiumEntryHigh = (basePremium * 1.02).toFixed(1);
 
-  // Stop Loss: 18% - 22% of premium (strict risk management)
   const slPoints = basePremium * 0.20;
   const stopLoss = (basePremium - slPoints).toFixed(1);
 
-  // Target 1: 1:1.5 Risk-to-Reward
   const tp1Points = slPoints * 1.5;
   const target1 = (basePremium + tp1Points).toFixed(1);
 
-  // Target 2: 1:2.8 Risk-to-Reward
   const tp2Points = slPoints * 2.8;
   const target2 = (basePremium + tp2Points).toFixed(1);
 
-  // Lot Size & Capital Calculation
   const capRequired = Math.round(basePremium * item.lotSize);
   const confidence = isBullish ? (85 + Math.floor(Math.random() * 8)) : (83 + Math.floor(Math.random() * 8));
 
-  // Update UI Elements
   const badge = document.getElementById('recSignalBadge');
   badge.textContent = `🎯 ${signalType}`;
   badge.className = isBullish ? 'signal-type-badge call' : 'signal-type-badge put';
@@ -278,7 +281,6 @@ function computeAndRenderRecommendation(item) {
   document.getElementById('recRiskReward').textContent = `Risk / Reward: 1 : 2.80`;
   document.getElementById('recCapReq').textContent = `Min Capital (1 Lot): ₹${capRequired.toLocaleString('en-IN')}`;
 
-  // Update Technical Checklist
   const patternEl = document.getElementById('candlePatternTag');
   patternEl.textContent = isBullish ? 'Bullish Hammer / Rejection Wick' : 'Bearish Shooting Star / Rejection';
   patternEl.style.color = isBullish ? 'var(--green)' : 'var(--red)';
@@ -303,7 +305,6 @@ function computeAndRenderRecommendation(item) {
   document.getElementById('confScore').textContent = `${confidence}%`;
   document.getElementById('lotDisplay').textContent = `${item.lotSize} Qty (1 Lot)`;
 
-  // Play subtle notification audio
   playNotificationSound();
 }
 
@@ -313,14 +314,12 @@ function playNotificationSound() {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
     gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start();
     osc.stop(audioCtx.currentTime + 0.35);
-  } catch (e) {
-    // AudioContext blocked before interaction
-  }
+  } catch (e) {}
 }
