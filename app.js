@@ -59,13 +59,14 @@ window.addEventListener('DOMContentLoaded', async () => {
   initTradingViewLightweightChart();
   fnoInstruments = DEFAULT_INSTRUMENTS;
   renderWatchlist();
+  renderMobileChips();
   if (fnoInstruments.length > 0) {
     selectInstrument(fnoInstruments[0]);
   }
   loadRealCandlesDatabase();
 
   setInterval(() => {
-    if (chartEngine === 'native' && currentInstrument) {
+    if (currentInstrument) {
       updateLiveTicks();
     }
   }, 3000);
@@ -369,6 +370,9 @@ function selectSpecificOptionTrade(symbol, premium, margin, lots, sl, tp1, tp2, 
 
   // Switch back to Signal View to review trade
   switchEngineTab('signal');
+  if (window.innerWidth <= 768) {
+    switchMobileView('signal');
+  }
 }
 
 // 🎯 Auto-Scan Entire Market for Capital
@@ -482,37 +486,42 @@ function startISTClock() {
 
 function initTradingViewLightweightChart() {
   const container = document.getElementById('tv_lightweight_chart');
+  if (!container || typeof LightweightCharts === 'undefined') return;
   container.innerHTML = '';
 
-  const rect = container.parentElement.getBoundingClientRect();
+  const parent = container.parentElement;
+  const rect = parent ? parent.getBoundingClientRect() : { width: 800, height: 420 };
+  const w = Math.max(300, rect.width || 800);
+  const h = Math.max(200, rect.height || 420);
 
-  tvChart = LightweightCharts.createChart(container, {
-    width: rect.width || 800,
-    height: rect.height || 420,
-    layout: {
-      background: { type: 'solid', color: '#131722' },
-      textColor: '#8290a5',
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-    },
-    grid: {
-      vertLines: { color: '#1c2230' },
-      horzLines: { color: '#1c2230' }
-    },
-    crosshair: {
-      mode: LightweightCharts.CrosshairMode.Normal,
-      vertLine: { color: '#00d2ff', width: 1, style: 3, labelBackgroundColor: '#00d2ff' },
-      horzLine: { color: '#00d2ff', width: 1, style: 3, labelBackgroundColor: '#00d2ff' }
-    },
-    rightPriceScale: {
-      borderColor: '#242d40',
-      autoScale: true
-    },
-    timeScale: {
-      borderColor: '#242d40',
-      timeVisible: true,
-      secondsVisible: false
-    }
-  });
+  try {
+    tvChart = LightweightCharts.createChart(container, {
+      width: w,
+      height: h,
+      layout: {
+        background: { type: 'solid', color: '#131722' },
+        textColor: '#8290a5',
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+      },
+      grid: {
+        vertLines: { color: '#1c2230' },
+        horzLines: { color: '#1c2230' }
+      },
+      crosshair: {
+        mode: LightweightCharts.CrosshairMode.Normal,
+        vertLine: { color: '#00d2ff', width: 1, style: 3, labelBackgroundColor: '#00d2ff' },
+        horzLine: { color: '#00d2ff', width: 1, style: 3, labelBackgroundColor: '#00d2ff' }
+      },
+      rightPriceScale: {
+        borderColor: '#242d40',
+        autoScale: true
+      },
+      timeScale: {
+        borderColor: '#242d40',
+        timeVisible: true,
+        secondsVisible: false
+      }
+    });
 
   candleSeries = tvChart.addCandlestickSeries({
     upColor: '#00e676',
@@ -550,12 +559,15 @@ function initTradingViewLightweightChart() {
     if (e21) document.getElementById('valE21').textContent = e21.value.toFixed(1);
   });
 
-  window.addEventListener('resize', () => {
-    if (tvChart) {
-      const parent = container.parentElement.getBoundingClientRect();
-      tvChart.resize(parent.width, parent.height);
-    }
-  });
+    window.addEventListener('resize', () => {
+      if (tvChart && container.parentElement) {
+        const parent = container.parentElement.getBoundingClientRect();
+        tvChart.resize(Math.max(300, parent.width), Math.max(200, parent.height));
+      }
+    });
+  } catch (e) {
+    console.log('Background chart runner active:', e);
+  }
 }
 
 function renderWatchlist() {
@@ -625,14 +637,27 @@ function selectInstrumentById(id) {
 function selectInstrument(item) {
   currentInstrument = item;
   renderWatchlist();
+  renderMobileChips();
 
-  document.getElementById('activeName').textContent = item.name;
+  const nameEl = document.getElementById('activeName');
+  if (nameEl) nameEl.textContent = item.name;
+
   const changeClass = item.isPositive ? 'up' : 'down';
   const pricePill = document.getElementById('activePricePill');
-  pricePill.textContent = `₹${item.basePrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${item.change})`;
-  pricePill.className = `active-price-pill ${changeClass}`;
-  document.getElementById('activeRange').textContent = `H: ₹${item.dayHigh.toLocaleString('en-IN')} | L: ₹${item.dayLow.toLocaleString('en-IN')}`;
-  document.getElementById('chartSymbolTitle').textContent = `${item.name} (${currentTF})`;
+  if (pricePill) {
+    pricePill.textContent = `₹${item.basePrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${item.change})`;
+    pricePill.className = `active-price-pill ${changeClass}`;
+  }
+
+  const rangeEl = document.getElementById('activeRange');
+  if (rangeEl && item.dayHigh && item.dayLow) {
+    rangeEl.textContent = `H: ₹${item.dayHigh.toLocaleString('en-IN')} | L: ₹${item.dayLow.toLocaleString('en-IN')}`;
+  }
+
+  const titleEl = document.getElementById('chartSymbolTitle');
+  if (titleEl) {
+    titleEl.textContent = `${item.name} (${currentTF})`;
+  }
 
   loadChart();
   runDeepScan(item);
@@ -640,11 +665,57 @@ function selectInstrument(item) {
   if (currentEngineTab === 'chain') {
     renderOptionChainTable();
   }
+
+  // If on mobile, automatically switch to Signal view so user sees trade immediately
+  if (window.innerWidth <= 768) {
+    switchMobileView('signal');
+  }
 }
 
 function findTradeFor(id) {
   const item = fnoInstruments.find(x => x.id === id);
   if (item) selectInstrument(item);
+}
+
+function switchMobileView(view) {
+  const watchlist = document.getElementById('watchlistPanel');
+  const terminal = document.getElementById('terminalArea');
+  
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
+  
+  if (view === 'watchlist') {
+    const navBtn = document.getElementById('mNavWatchlist');
+    if (navBtn) navBtn.classList.add('active');
+    if (watchlist) watchlist.classList.add('mobile-active');
+    if (terminal) terminal.classList.remove('mobile-active');
+  } else if (view === 'chain') {
+    const navBtn = document.getElementById('mNavChain');
+    if (navBtn) navBtn.classList.add('active');
+    if (watchlist) watchlist.classList.remove('mobile-active');
+    if (terminal) terminal.classList.add('mobile-active');
+    switchEngineTab('chain');
+  } else {
+    const navBtn = document.getElementById('mNavSignal');
+    if (navBtn) navBtn.classList.add('active');
+    if (watchlist) watchlist.classList.remove('mobile-active');
+    if (terminal) terminal.classList.add('mobile-active');
+    switchEngineTab('signal');
+  }
+}
+
+function renderMobileChips() {
+  const container = document.getElementById('mobileChipCarousel');
+  if (!container) return;
+  container.innerHTML = fnoInstruments.map(item => {
+    const isSelected = currentInstrument && currentInstrument.id === item.id;
+    const changeClass = item.isPositive ? 'up' : 'down';
+    return `
+      <button class="m-chip ${isSelected ? 'active' : ''}" onclick="selectInstrumentById('${item.id}')">
+        <span>${item.name}</span>
+        <span class="m-chip-change ${changeClass}">${item.change}</span>
+      </button>
+    `;
+  }).join('');
 }
 
 function setChartEngine(engine) {
@@ -805,7 +876,7 @@ function calculateEMALightweight(candles, period) {
 }
 
 function updateTradingViewLightweightChart(fitContent = false) {
-  if (!tvChart || liveCandles.length === 0) return;
+  if (liveCandles.length === 0) return;
 
   const tvCandles = liveCandles.map(c => {
     let t = c.time > 2000000000 ? Math.floor(c.time / 1000) : c.time;
@@ -823,48 +894,49 @@ function updateTradingViewLightweightChart(fitContent = false) {
     }
   }
 
-  candleSeries.setData(uniqueCandles);
-
-  const volumeData = liveCandles.map((c) => {
-    let t = c.time > 2000000000 ? Math.floor(c.time / 1000) : c.time;
-    const isUp = c.close >= c.open;
-    return { time: t, value: c.volume || 1000, color: isUp ? 'rgba(0, 230, 118, 0.4)' : 'rgba(255, 23, 68, 0.4)' };
-  }).filter(v => seenTimes.has(v.time));
-  volumeData.sort((a, b) => a.time - b.time);
-  volumeSeries.setData(volumeData);
-
   const ema9Data = calculateEMALightweight(uniqueCandles, 9);
   const ema21Data = calculateEMALightweight(uniqueCandles, 21);
   const ema50Data = calculateEMALightweight(uniqueCandles, 50);
 
-  ema9Series.setData(ema9Data);
-  ema21Series.setData(ema21Data);
-  ema50Series.setData(ema50Data);
-
+  // Update Live Candlestick & Technical metrics in background status bar
   if (uniqueCandles.length > 0) {
     const last = uniqueCandles[uniqueCandles.length - 1];
-    const isBull = currentInstrument ? currentInstrument.isPositive : true;
+    const valO = document.getElementById('valO');
+    const valH = document.getElementById('valH');
+    const valL = document.getElementById('valL');
+    const valC = document.getElementById('valC');
+    const valE9 = document.getElementById('valE9');
+    const valE21 = document.getElementById('valE21');
 
-    document.getElementById('valO').textContent = last.open.toFixed(1);
-    document.getElementById('valH').textContent = last.high.toFixed(1);
-    document.getElementById('valL').textContent = last.low.toFixed(1);
-    document.getElementById('valC').textContent = last.close.toFixed(1);
-    if (ema9Data.length > 0) document.getElementById('valE9').textContent = ema9Data[ema9Data.length - 1].value.toFixed(1);
-    if (ema21Data.length > 0) document.getElementById('valE21').textContent = ema21Data[ema21Data.length - 1].value.toFixed(1);
-
-    candleSeries.setMarkers([
-      {
-        time: last.time,
-        position: isBull ? 'belowBar' : 'aboveBar',
-        color: isBull ? '#00e676' : '#ff1744',
-        shape: isBull ? 'arrowUp' : 'arrowDown',
-        text: isBull ? 'BUY CE' : 'BUY PE'
-      }
-    ]);
+    if (valO) valO.textContent = last.open.toFixed(1);
+    if (valH) valH.textContent = last.high.toFixed(1);
+    if (valL) valL.textContent = last.low.toFixed(1);
+    if (valC) valC.textContent = last.close.toFixed(1);
+    if (valE9 && ema9Data.length > 0) valE9.textContent = ema9Data[ema9Data.length - 1].value.toFixed(1);
+    if (valE21 && ema21Data.length > 0) valE21.textContent = ema21Data[ema21Data.length - 1].value.toFixed(1);
   }
 
-  if (fitContent) {
-    tvChart.timeScale().fitContent();
+  // Update chart series if canvas is instantiated
+  if (tvChart && candleSeries) {
+    try {
+      candleSeries.setData(uniqueCandles);
+
+      const volumeData = liveCandles.map((c) => {
+        let t = c.time > 2000000000 ? Math.floor(c.time / 1000) : c.time;
+        const isUp = c.close >= c.open;
+        return { time: t, value: c.volume || 1000, color: isUp ? 'rgba(0, 230, 118, 0.4)' : 'rgba(255, 23, 68, 0.4)' };
+      }).filter(v => seenTimes.has(v.time));
+      volumeData.sort((a, b) => a.time - b.time);
+      if (volumeSeries) volumeSeries.setData(volumeData);
+
+      if (ema9Series) ema9Series.setData(ema9Data);
+      if (ema21Series) ema21Series.setData(ema21Data);
+      if (ema50Series) ema50Series.setData(ema50Data);
+
+      if (fitContent) {
+        tvChart.timeScale().fitContent();
+      }
+    } catch (e) {}
   }
 }
 
