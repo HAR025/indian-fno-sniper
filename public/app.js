@@ -69,7 +69,59 @@ window.addEventListener('DOMContentLoaded', async () => {
       updateLiveTicks();
     }
   }, 3000);
+
+  setInterval(() => {
+    fetchLiveCurrentPrice();
+  }, 10000);
 });
+
+let isFetchingLivePrice = false;
+async function fetchLiveCurrentPrice() {
+  if (isFetchingLivePrice || !currentInstrument || !currentInstrument.yfSymbol) return;
+  const status = getIndianMarketStatus();
+  if (!status.isOpen) return;
+
+  isFetchingLivePrice = true;
+  try {
+    const url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/' + currentInstrument.yfSymbol + '?interval=1d');
+    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    const data = await res.json();
+    if (data && data.chart && data.chart.result && data.chart.result[0]) {
+      const meta = data.chart.result[0].meta;
+      const livePrice = meta.regularMarketPrice;
+      const prevClose = meta.chartPreviousClose || currentInstrument.basePrice;
+      const changeVal = ((livePrice - prevClose) / prevClose * 100).toFixed(2);
+      const isUp = livePrice >= prevClose;
+
+      currentInstrument.basePrice = livePrice;
+      currentInstrument.change = (isUp ? '+' : '') + changeVal + '%';
+      currentInstrument.isPositive = isUp;
+      if (meta.regularMarketDayHigh) currentInstrument.dayHigh = meta.regularMarketDayHigh;
+      if (meta.regularMarketDayLow) currentInstrument.dayLow = meta.regularMarketDayLow;
+
+      const pricePill = document.getElementById('activePricePill');
+      if (pricePill) {
+        pricePill.textContent = `₹${livePrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${currentInstrument.change})`;
+        pricePill.className = `active-price-pill ${isUp ? 'up' : 'down'}`;
+      }
+      const rangeEl = document.getElementById('activeRange');
+      if (rangeEl && currentInstrument.dayHigh && currentInstrument.dayLow) {
+        rangeEl.textContent = `H: ₹${currentInstrument.dayHigh.toLocaleString('en-IN')} | L: ₹${currentInstrument.dayLow.toLocaleString('en-IN')}`;
+      }
+
+      if (liveCandles.length > 0) {
+        const last = liveCandles[liveCandles.length - 1];
+        last.close = livePrice;
+        if (livePrice > last.high) last.high = livePrice;
+        if (livePrice < last.low) last.low = livePrice;
+        updateTradingViewLightweightChart(false);
+      }
+    }
+  } catch (e) {
+  } finally {
+    isFetchingLivePrice = false;
+  }
+}
 
 // Capital Management
 function initCapital() {
@@ -584,6 +636,7 @@ function selectInstrument(item) {
 
   loadChart();
   runDeepScan(item);
+  fetchLiveCurrentPrice();
   if (currentEngineTab === 'chain') {
     renderOptionChainTable();
   }
