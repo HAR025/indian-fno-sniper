@@ -19,20 +19,20 @@ let ema9Series = null;
 let ema21Series = null;
 let ema50Series = null;
 
-// Complete Indian FnO Database (LIVE Official NSE/BSE Market Rates - Tuesday Live Session)
+// Complete Indian FnO Database (LIVE Official NSE/BSE Market Rates - Wednesday Live Session)
 const DEFAULT_INSTRUMENTS = [
-  { id: 'nifty', name: 'NIFTY 50', symbol: 'NSE:NIFTY', tvSymbol: 'NSE:NIFTY', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:NIFTY', yfSymbol: '^NSEI', category: 'Index', basePrice: 23376.10, lotSize: 25, strikeStep: 50, change: '-0.16%', isPositive: false, dayHigh: 23489.00, dayLow: 23368.20, iv: 0.13 },
-  { id: 'banknifty', name: 'BANK NIFTY', symbol: 'NSE:BANKNIFTY', tvSymbol: 'NSE:BANKNIFTY', etfSymbol: 'NSE:BANKBEES', officialSymbol: 'NSE:BANKNIFTY', yfSymbol: '^NSEBANK', category: 'Index', basePrice: 56365.20, lotSize: 15, strikeStep: 100, change: '-0.19%', isPositive: false, dayHigh: 56671.10, dayLow: 56339.30, iv: 0.17 },
-  { id: 'sensex', name: 'BSE SENSEX', symbol: 'BSE:SENSEX', tvSymbol: 'BSE:SENSEX', etfSymbol: 'BSE:SENSEX', officialSymbol: 'BSE:SENSEX', yfSymbol: '^BSESN', category: 'Index', basePrice: 74835.40, lotSize: 10, strikeStep: 100, change: '-0.03%', isPositive: false, dayHigh: 75038.93, dayLow: 74835.40, iv: 0.13 },
-  { id: 'finnifty', name: 'FIN NIFTY', symbol: 'NSE:FINNIFTY', tvSymbol: 'NSE:FINNIFTY', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:FINNIFTY', yfSymbol: 'NIFTY_FIN_SERVICE.NS', category: 'Index', basePrice: 25535.10, lotSize: 25, strikeStep: 50, change: '+0.04%', isPositive: true, dayHigh: 25652.70, dayLow: 25520.55, iv: 0.14 },
-  { id: 'reliance', name: 'RELIANCE', symbol: 'NSE:RELIANCE', tvSymbol: 'NSE:RELIANCE', etfSymbol: 'NSE:RELIANCE', officialSymbol: 'NSE:RELIANCE', yfSymbol: 'RELIANCE.NS', category: 'Stock', basePrice: 1248.20, lotSize: 250, strikeStep: 20, change: '+0.06%', isPositive: true, dayHigh: 1251.90, dayLow: 1244.60, iv: 0.20 },
-  { id: 'hdfcbank', name: 'HDFC BANK', symbol: 'NSE:HDFCBANK', tvSymbol: 'NSE:HDFCBANK', etfSymbol: 'NSE:HDFCBANK', officialSymbol: 'NSE:HDFCBANK', yfSymbol: 'HDFCBANK.NS', category: 'Stock', basePrice: 745.70, lotSize: 550, strikeStep: 10, change: '+0.84%', isPositive: true, dayHigh: 749.30, dayLow: 738.85, iv: 0.22 },
-  { id: 'icicibank', name: 'ICICI BANK', symbol: 'NSE:ICICIBANK', tvSymbol: 'NSE:ICICIBANK', etfSymbol: 'NSE:ICICIBANK', officialSymbol: 'NSE:ICICIBANK', yfSymbol: 'ICICIBANK.NS', category: 'Stock', basePrice: 1338.70, lotSize: 700, strikeStep: 10, change: '-0.47%', isPositive: false, dayHigh: 1347.20, dayLow: 1338.40, iv: 0.21 },
-  { id: 'tcs', name: 'TCS', symbol: 'NSE:TCS', tvSymbol: 'NSE:TCS', etfSymbol: 'NSE:TCS', officialSymbol: 'NSE:TCS', yfSymbol: 'TCS.NS', category: 'Stock', basePrice: 2104.40, lotSize: 175, strikeStep: 50, change: '-1.14%', isPositive: false, dayHigh: 2135.20, dayLow: 2100.00, iv: 0.22 },
-  { id: 'infy', name: 'INFOSYS', symbol: 'NSE:INFY', tvSymbol: 'NSE:INFY', etfSymbol: 'NSE:INFY', officialSymbol: 'NSE:INFY', yfSymbol: 'INFY.NS', category: 'Stock', basePrice: 1021.00, lotSize: 400, strikeStep: 20, change: '-1.69%', isPositive: false, dayHigh: 1041.00, dayLow: 1019.20, iv: 0.23 },
-  { id: 'sbin', name: 'SBI (SBIN)', symbol: 'NSE:SBIN', tvSymbol: 'NSE:SBIN', etfSymbol: 'NSE:SBIN', officialSymbol: 'NSE:SBIN', yfSymbol: 'SBIN.NS', category: 'Stock', basePrice: 988.80, lotSize: 1500, strikeStep: 5, change: '-0.72%', isPositive: false, dayHigh: 1000.10, dayLow: 987.00, iv: 0.24 },
-  { id: 'bajfinance', name: 'BAJAJ FINANCE', symbol: 'NSE:BAJFINANCE', tvSymbol: 'NSE:BAJFINANCE', etfSymbol: 'NSE:BAJFINANCE', officialSymbol: 'NSE:BAJFINANCE', yfSymbol: 'BAJFINANCE.NS', category: 'Stock', basePrice: 1020.80, lotSize: 125, strikeStep: 50, change: '-0.05%', isPositive: false, dayHigh: 1029.20, dayLow: 1018.40, iv: 0.26 },
-  { id: 'bhartiartl', name: 'BHARTI AIRTEL', symbol: 'NSE:BHARTIARTL', tvSymbol: 'NSE:BHARTIARTL', etfSymbol: 'NSE:BHARTIARTL', officialSymbol: 'NSE:BHARTIARTL', yfSymbol: 'BHARTIARTL.NS', category: 'Stock', basePrice: 1829.50, lotSize: 475, strikeStep: 10, change: '-0.04%', isPositive: false, dayHigh: 1836.30, dayLow: 1822.20, iv: 0.22 }
+  { id: 'nifty', name: 'NIFTY 50', symbol: 'NSE:NIFTY', tvSymbol: 'NSE:NIFTY', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:NIFTY', yfSymbol: '^NSEI', category: 'Index', basePrice: 23410.65, lotSize: 25, strikeStep: 50, change: '+0.35%', isPositive: true, dayHigh: 23414.55, dayLow: 23349.55, iv: 0.13 },
+  { id: 'banknifty', name: 'BANK NIFTY', symbol: 'NSE:BANKNIFTY', tvSymbol: 'NSE:BANKNIFTY', etfSymbol: 'NSE:BANKBEES', officialSymbol: 'NSE:BANKNIFTY', yfSymbol: '^NSEBANK', category: 'Index', basePrice: 56542.30, lotSize: 15, strikeStep: 100, change: '+0.58%', isPositive: true, dayHigh: 56544.15, dayLow: 56209.65, iv: 0.17 },
+  { id: 'sensex', name: 'BSE SENSEX', symbol: 'BSE:SENSEX', tvSymbol: 'BSE:SENSEX', etfSymbol: 'BSE:SENSEX', officialSymbol: 'BSE:SENSEX', yfSymbol: '^BSESN', category: 'Index', basePrice: 74738.50, lotSize: 10, strikeStep: 100, change: '+0.28%', isPositive: true, dayHigh: 74812.74, dayLow: 74599.88, iv: 0.13 },
+  { id: 'finnifty', name: 'FIN NIFTY', symbol: 'NSE:FINNIFTY', tvSymbol: 'NSE:FINNIFTY', etfSymbol: 'NSE:NIFTYBEES', officialSymbol: 'NSE:FINNIFTY', yfSymbol: 'NIFTY_FIN_SERVICE.NS', category: 'Index', basePrice: 25566.00, lotSize: 25, strikeStep: 50, change: '+0.58%', isPositive: true, dayHigh: 25574.20, dayLow: 25480.35, iv: 0.14 },
+  { id: 'reliance', name: 'RELIANCE', symbol: 'NSE:RELIANCE', tvSymbol: 'NSE:RELIANCE', etfSymbol: 'NSE:RELIANCE', officialSymbol: 'NSE:RELIANCE', yfSymbol: 'RELIANCE.NS', category: 'Stock', basePrice: 1244.40, lotSize: 250, strikeStep: 20, change: '+0.32%', isPositive: true, dayHigh: 1246.00, dayLow: 1238.90, iv: 0.20 },
+  { id: 'hdfcbank', name: 'HDFC BANK', symbol: 'NSE:HDFCBANK', tvSymbol: 'NSE:HDFCBANK', etfSymbol: 'NSE:HDFCBANK', officialSymbol: 'NSE:HDFCBANK', yfSymbol: 'HDFCBANK.NS', category: 'Stock', basePrice: 740.20, lotSize: 550, strikeStep: 10, change: '+0.22%', isPositive: true, dayHigh: 741.25, dayLow: 734.00, iv: 0.22 },
+  { id: 'icicibank', name: 'ICICI BANK', symbol: 'NSE:ICICIBANK', tvSymbol: 'NSE:ICICIBANK', etfSymbol: 'NSE:ICICIBANK', officialSymbol: 'NSE:ICICIBANK', yfSymbol: 'ICICIBANK.NS', category: 'Stock', basePrice: 1338.10, lotSize: 700, strikeStep: 10, change: '-0.11%', isPositive: false, dayHigh: 1344.50, dayLow: 1333.50, iv: 0.21 },
+  { id: 'tcs', name: 'TCS', symbol: 'NSE:TCS', tvSymbol: 'NSE:TCS', etfSymbol: 'NSE:TCS', officialSymbol: 'NSE:TCS', yfSymbol: 'TCS.NS', category: 'Stock', basePrice: 2090.00, lotSize: 175, strikeStep: 50, change: '-0.71%', isPositive: false, dayHigh: 2104.20, dayLow: 2085.20, iv: 0.22 },
+  { id: 'infy', name: 'INFOSYS', symbol: 'NSE:INFY', tvSymbol: 'NSE:INFY', etfSymbol: 'NSE:INFY', officialSymbol: 'NSE:INFY', yfSymbol: 'INFY.NS', category: 'Stock', basePrice: 1023.70, lotSize: 400, strikeStep: 20, change: '-0.55%', isPositive: false, dayHigh: 1029.40, dayLow: 1020.40, iv: 0.23 },
+  { id: 'sbin', name: 'SBI (SBIN)', symbol: 'NSE:SBIN', tvSymbol: 'NSE:SBIN', etfSymbol: 'NSE:SBIN', officialSymbol: 'NSE:SBIN', yfSymbol: 'SBIN.NS', category: 'Stock', basePrice: 992.10, lotSize: 1500, strikeStep: 5, change: '+0.52%', isPositive: true, dayHigh: 992.10, dayLow: 986.40, iv: 0.24 },
+  { id: 'bajfinance', name: 'BAJAJ FINANCE', symbol: 'NSE:BAJFINANCE', tvSymbol: 'NSE:BAJFINANCE', etfSymbol: 'NSE:BAJFINANCE', officialSymbol: 'NSE:BAJFINANCE', yfSymbol: 'BAJFINANCE.NS', category: 'Stock', basePrice: 1035.00, lotSize: 125, strikeStep: 50, change: '+2.60%', isPositive: true, dayHigh: 1040.90, dayLow: 1022.00, iv: 0.26 },
+  { id: 'bhartiartl', name: 'BHARTI AIRTEL', symbol: 'NSE:BHARTIARTL', tvSymbol: 'NSE:BHARTIARTL', etfSymbol: 'NSE:BHARTIARTL', officialSymbol: 'NSE:BHARTIARTL', yfSymbol: 'BHARTIARTL.NS', category: 'Stock', basePrice: 1822.80, lotSize: 475, strikeStep: 10, change: '+0.31%', isPositive: true, dayHigh: 1828.10, dayLow: 1818.00, iv: 0.22 }
 ];
 
 let realCandlesCache = {};
@@ -203,9 +203,31 @@ function updateCapitalHeaderUI() {
   }
 }
 
+function getDaysToExpiry() {
+  const now = new Date();
+  const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const ist = new Date(utcMs + 5.5 * 3600000);
+  const day = ist.getDay(); // 0 Sun, 1 Mon, 2 Tue, 3 Wed, 4 Thu, 5 Fri, 6 Sat
+  if (day === 4) {
+    const hours = ist.getHours() + ist.getMinutes() / 60;
+    return Math.max(0.1, (15.5 - Math.max(9.25, hours)) / 6.25 * 0.4);
+  } else if (day === 3) {
+    return 1.2; // Wednesday: 1 day to Thursday weekly expiry
+  } else if (day === 2) {
+    return 2.2; // Tuesday
+  } else if (day === 1) {
+    return 3.2; // Monday
+  } else if (day === 5) {
+    return 6.2; // Friday
+  } else {
+    return 4.2; // Weekend
+  }
+}
+
 // Official Black-Scholes Option Pricing Model for Indian FnO Market
-function calcIndianOptionPremium(spot, strike, isCall, daysToExpiry = 2, iv = 0.15) {
-  const T = Math.max(daysToExpiry, 0.5) / 365.0;
+function calcIndianOptionPremium(spot, strike, isCall, daysToExpiry = null, iv = 0.15) {
+  const dte = (daysToExpiry !== null && !isNaN(daysToExpiry)) ? daysToExpiry : getDaysToExpiry();
+  const T = Math.max(dte, 0.1) / 365.0;
   const r = 0.065; // RBI repo rate
   const sigma = Math.max(0.08, iv);
   
@@ -240,7 +262,7 @@ function getOptionLotCost(item, isCall = false) {
   const step = item.strikeStep;
   const atm = Math.round(item.basePrice / step) * step;
   const iv = item.iv || (item.id === 'banknifty' ? 0.17 : 0.14);
-  const premium = calcIndianOptionPremium(item.basePrice, atm, isCall, 2, iv);
+  const premium = calcIndianOptionPremium(item.basePrice, atm, isCall, getDaysToExpiry(), iv);
   return {
     strike: atm,
     premium: premium,
