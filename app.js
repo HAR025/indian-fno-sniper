@@ -516,19 +516,21 @@ function renderRadarTable() {
     const atm = Math.round(item.basePrice / step) * step;
     const iv = item.iv || (item.id === 'banknifty' ? 0.17 : 0.14);
 
-    // Call Setup
+    // Call Setup (Strict 1:2 Risk-to-Reward)
     const cePremium = calcIndianOptionPremium(item.basePrice, atm, true, getDaysToExpiry(), iv);
     const ceMargin = Math.round(cePremium * item.lotSize);
     const ceLots = Math.floor(userCapital / ceMargin);
-    const ceT1 = (cePremium * 1.30).toFixed(1);
-    const ceSL = (cePremium * 0.80).toFixed(1);
+    const ceRiskPts = Math.max(12, Math.round(cePremium * 0.18 * 10) / 10);
+    const ceSL = (cePremium - ceRiskPts).toFixed(1);
+    const ceT1 = (cePremium + ceRiskPts * 2.0).toFixed(1); // Exact 1:2 R:R
 
-    // Put Setup
+    // Put Setup (Strict 1:2 Risk-to-Reward)
     const pePremium = calcIndianOptionPremium(item.basePrice, atm, false, getDaysToExpiry(), iv);
     const peMargin = Math.round(pePremium * item.lotSize);
     const peLots = Math.floor(userCapital / peMargin);
-    const peT1 = (pePremium * 1.30).toFixed(1);
-    const peSL = (pePremium * 0.80).toFixed(1);
+    const peRiskPts = Math.max(12, Math.round(pePremium * 0.18 * 10) / 10);
+    const peSL = (pePremium - peRiskPts).toFixed(1);
+    const peT1 = (pePremium + peRiskPts * 2.0).toFixed(1); // Exact 1:2 R:R
 
     const isFavoredCall = analysis.isBullish;
     const favoredStrike = isFavoredCall ? `${atm} CE` : `${atm} PE`;
@@ -1112,19 +1114,20 @@ function computeAndRenderRecommendation(item) {
   const entryLow = (basePremium * 0.98).toFixed(1);
   const entryHigh = (basePremium * 1.02).toFixed(1);
 
-  const slPoints = basePremium * 0.18;
+  // Strict 1:2 Minimum Risk-to-Reward Ratio (No small micro trades)
+  const slPoints = Math.max(12, Math.round(basePremium * 0.18 * 10) / 10);
   const stopLoss = (basePremium - slPoints).toFixed(1);
-  const tp1Points = slPoints * 1.5;
+  const tp1Points = Math.round(slPoints * 2.0 * 10) / 10; // Exactly 1:2 R:R (Double the risk)
   const target1 = (basePremium + tp1Points).toFixed(1);
-  const tp2Points = slPoints * 2.85;
+  const tp2Points = Math.round(slPoints * 3.0 * 10) / 10; // 1:3 R:R (Triple the risk)
   const target2 = (basePremium + tp2Points).toFixed(1);
 
-  // Spot price level anchors for chart lines
+  // Spot price level anchors for chart lines (Strict 1:2 and 1:3)
   const spotFactor = (step * 0.6);
   const spotRef = spotPrice;
   const spotSL = isBullish ? (spotPrice - spotFactor) : (spotPrice + spotFactor);
-  const spotT1 = isBullish ? (spotPrice + spotFactor * 1.5) : (spotPrice - spotFactor * 1.5);
-  const spotT2 = isBullish ? (spotPrice + spotFactor * 2.85) : (spotPrice - spotFactor * 2.85);
+  const spotT1 = isBullish ? (spotPrice + spotFactor * 2.0) : (spotPrice - spotFactor * 2.0); // 1:2 on chart
+  const spotT2 = isBullish ? (spotPrice + spotFactor * 3.0) : (spotPrice - spotFactor * 3.0); // 1:3 on chart
 
   let lotsAllowed = Math.floor(userCapital / costPerLot);
   const maxLotsRiskPreserved = Math.max(1, Math.floor((userCapital * 0.35) / costPerLot));
@@ -1183,16 +1186,16 @@ function computeAndRenderRecommendation(item) {
   if (t1El) t1El.textContent = `₹${target1}`;
 
   const t1PtsEl = document.getElementById('recT1Points');
-  if (t1PtsEl) t1PtsEl.textContent = `+${tp1Points.toFixed(1)} pts (1:1.5 RR)`;
+  if (t1PtsEl) t1PtsEl.textContent = `+${tp1Points.toFixed(1)} pts (Clean 1:2 R:R | Double Risk)`;
 
   const t2El = document.getElementById('recTarget2');
   if (t2El) t2El.textContent = `₹${target2}`;
 
   const t2PtsEl = document.getElementById('recT2Points');
-  if (t2PtsEl) t2PtsEl.textContent = `+${tp2Points.toFixed(1)} pts (1:2.85 RR)`;
+  if (t2PtsEl) t2PtsEl.textContent = `+${tp2Points.toFixed(1)} pts (Extended 1:3 R:R | 3x Risk)`;
 
   const rrEl = document.getElementById('recRiskReward');
-  if (rrEl) rrEl.textContent = `Risk / Reward: 1 : 2.85`;
+  if (rrEl) rrEl.textContent = `Risk / Reward: 1 : 2.00 (Strict 1:2 Target)`;
 
   // Capital Sizing UI
   const lotsEl = document.getElementById('capLotsAllowed');
@@ -1300,16 +1303,16 @@ function copyTradeOrder() {
 Strike: ${t.symbol}
 Action: ${t.action}
 Entry Zone: ₹${t.entryLow} - ₹${t.entryHigh}
-Stop Loss: ₹${t.stopLoss} (Strict SL)
-Target 1: ₹${t.target1} (Book 50% & Trail SL)
-Target 2: ₹${t.target2} (Runner)
+Stop Loss: ₹${t.stopLoss} (Strict 1R Risk)
+Target 1: ₹${t.target1} (Clean 1:2 R:R | Double Risk)
+Target 2: ₹${t.target2} (Extended 1:3 R:R | 3x Risk)
 Position Size: ${t.lots} Lots (${t.qty} Qty)
 Margin Required: ₹${t.margin.toLocaleString('en-IN')}
-Risk/Reward: 1 : 2.85
+Risk/Reward: 1 : 2.00 (Strict 1:2 Minimum Guarantee)
 Signal Score: ${t.confidence}% Confluence
 Session Time: ${timeNow} IST
 -----------------------------------------
-Rules: Never chase above entry high. Move SL to cost at T1.`;
+Rules: Never chase above entry high. Target 1 is double SL. Move SL to cost at T1.`;
 
   navigator.clipboard.writeText(orderText).then(() => {
     showToast('Trade Order Copied to Clipboard!');
@@ -1579,6 +1582,9 @@ function renderOptionChainTable() {
     let ceLabel = d === 0 ? 'ATM' : (d < 0 ? `ITM (${Math.abs(d)})` : `OTM (+${d})`);
     let peLabel = d === 0 ? 'ATM' : (d > 0 ? `ITM (+${d})` : `OTM (${Math.abs(d)})`);
 
+    const ceRisk = Math.max(12, Math.round(cePremium * 0.18 * 10) / 10);
+    const peRisk = Math.max(12, Math.round(pePremium * 0.18 * 10) / 10);
+
     if (ceMargin <= userCapital) {
       fullChain.push({
         symbol: `${currentInstrument.name} ${strike} CE`,
@@ -1589,9 +1595,9 @@ function renderOptionChainTable() {
         margin: ceMargin,
         lotsAllowed: ceLots,
         isRecommended: isMarketBullish && d === 0,
-        sl: (cePremium * 0.80).toFixed(1),
-        tp1: (cePremium * 1.30).toFixed(1),
-        tp2: (cePremium * 1.55).toFixed(1)
+        sl: (cePremium - ceRisk).toFixed(1),
+        tp1: (cePremium + ceRisk * 2.0).toFixed(1), // Strict 1:2 R:R
+        tp2: (cePremium + ceRisk * 3.0).toFixed(1)  // Strict 1:3 R:R
       });
     }
 
@@ -1605,9 +1611,9 @@ function renderOptionChainTable() {
         margin: peMargin,
         lotsAllowed: peLots,
         isRecommended: !isMarketBullish && d === 0,
-        sl: (pePremium * 0.80).toFixed(1),
-        tp1: (pePremium * 1.30).toFixed(1),
-        tp2: (pePremium * 1.55).toFixed(1)
+        sl: (pePremium - peRisk).toFixed(1),
+        tp1: (pePremium + peRisk * 2.0).toFixed(1), // Strict 1:2 R:R
+        tp2: (pePremium + peRisk * 3.0).toFixed(1)  // Strict 1:3 R:R
       });
     }
   });
@@ -1670,13 +1676,17 @@ function selectSpecificOptionTrade(symbol, premium, margin, lots, sl, tp1, tp2, 
   badge.textContent = isCall ? '🎯 BUY CALL (CE)' : '🎯 BUY PUT (PE)';
   badge.className = isCall ? 'signal-type-badge call' : 'signal-type-badge put';
 
+  const riskDiff = Math.max(1, premium - sl);
   document.getElementById('recEntry').textContent = `₹${(premium * 0.98).toFixed(1)} - ₹${(premium * 1.02).toFixed(1)}`;
   document.getElementById('recSL').textContent = `₹${sl}`;
-  document.getElementById('recSLPoints').textContent = `-${(premium - sl).toFixed(1)} pts`;
+  document.getElementById('recSLPoints').textContent = `-${riskDiff.toFixed(1)} pts (1R Safe SL)`;
   document.getElementById('recTarget1').textContent = `₹${tp1}`;
-  document.getElementById('recT1Points').textContent = `+${(tp1 - premium).toFixed(1)} pts`;
+  document.getElementById('recT1Points').textContent = `+${(tp1 - premium).toFixed(1)} pts (Clean 1:2 R:R | Double Risk)`;
   document.getElementById('recTarget2').textContent = `₹${tp2}`;
-  document.getElementById('recT2Points').textContent = `+${(tp2 - premium).toFixed(1)} pts`;
+  document.getElementById('recT2Points').textContent = `+${(tp2 - premium).toFixed(1)} pts (Extended 1:3 R:R | 3x Risk)`;
+
+  const rrEl = document.getElementById('recRiskReward');
+  if (rrEl) rrEl.textContent = `Risk / Reward: 1 : 2.00 (Strict 1:2 Target)`;
 
   const safeLots = Math.max(1, Math.min(lots, Math.floor((userCapital * 0.35) / margin)));
   const totalQty = safeLots * currentInstrument.lotSize;

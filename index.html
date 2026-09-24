@@ -198,6 +198,7 @@
               <div class="rec-badge-group">
                 <span class="badge-tag expiry-tag">CURRENT EXPIRY</span>
                 <span class="badge-tag rank-tag" id="recRankTag">⭐ TOP PICK #1</span>
+                <span class="badge-tag rr-tag" id="recRRBadge">🎯 1:2 R:R GUARANTEE</span>
               </div>
             </div>
 
@@ -209,19 +210,19 @@
                 <div class="level-sub">Enter within zone; do not chase above</div>
               </div>
               <div class="level-box sl">
-                <div class="level-label">Strict Stop-Loss</div>
+                <div class="level-label">Strict Stop-Loss (1R)</div>
                 <div class="level-value" id="recSL" style="color: var(--red);">₹108.00</div>
                 <div class="level-sub" id="recSLPoints">-25.0 pts (Risk anchored)</div>
               </div>
               <div class="level-box target">
-                <div class="level-label">Target 1 (Book 50%)</div>
-                <div class="level-value" id="recTarget1" style="color: var(--green);">₹172.00</div>
-                <div class="level-sub" id="recT1Points">+38.0 pts (1:1.5 RR)</div>
+                <div class="level-label">Target 1 (Clean 1:2 R:R)</div>
+                <div class="level-value" id="recTarget1" style="color: var(--green);">₹180.00</div>
+                <div class="level-sub" id="recT1Points">+50.0 pts (Exact 2x Risk)</div>
               </div>
               <div class="level-box target-runner">
-                <div class="level-label">Target 2 (Runner)</div>
-                <div class="level-value" id="recTarget2" style="color: var(--gold);">₹205.00</div>
-                <div class="level-sub" id="recT2Points">+71.0 pts (1:2.85 RR)</div>
+                <div class="level-label">Target 2 (Extended 1:3 R:R)</div>
+                <div class="level-value" id="recTarget2" style="color: var(--gold);">₹215.00</div>
+                <div class="level-sub" id="recT2Points">+75.0 pts (3x Risk Runner)</div>
               </div>
             </div>
 
@@ -243,7 +244,7 @@
 
             <!-- Action Buttons Footer -->
             <div class="rec-footer">
-              <span id="recRiskReward" class="risk-reward-tag">Risk / Reward: 1 : 2.85</span>
+              <span id="recRiskReward" class="risk-reward-tag">Risk / Reward: 1 : 2.00 (Minimum 1:2 Target)</span>
               <div class="rec-footer-actions">
                 <button class="btn-copy-order" onclick="copyTradeOrder()" title="Copy formatted order to clipboard">
                   <span>📋</span> Copy Order Slip
@@ -301,11 +302,12 @@
 
             <!-- Fair Execution Rules & Safeguards (Prevent Mistakes) -->
             <div class="fair-trading-box">
-              <div class="fair-title">🛡️ High Probability Execution Rules (Zero-Mistake Protocol):</div>
+              <div class="fair-title">🛡️ Strict 1:2 Risk-to-Reward Execution Protocol (No Small Trades):</div>
               <ul class="fair-rules-list">
-                <li><b>Rule 1:</b> Enter strictly within entry range. If price jumps >2% above entry, wait for pullback.</li>
-                <li><b>Rule 2:</b> When Target 1 hits, immediately trail Stop Loss to Entry price for a risk-free trade.</li>
-                <li><b>Rule 3:</b> Strict stop-loss exit if 5-minute candle closes below SL level.</li>
+                <li><b>Rule 1 (1:2 Minimum R:R):</b> Target 1 is strictly 2.0x your stop-loss risk. Never take small 1:1 or micro scalps.</li>
+                <li><b>Rule 2:</b> Enter strictly within entry range. If price jumps >2% above entry, wait for pullback.</li>
+                <li><b>Rule 3:</b> When Target 1 hits (1:2 reached), immediately trail Stop Loss to Entry price for a risk-free trade.</li>
+                <li><b>Rule 4:</b> Strict stop-loss exit if 5-minute candle closes below SL level.</li>
               </ul>
             </div>
           </div>
@@ -317,22 +319,22 @@
                 <div class="conf-number" id="confScore">94%</div>
                 <div class="conf-label">Institutional Confluence Score</div>
               </div>
-              <div class="conf-subtext" id="confSubtext">High Conviction Intraday Signal</div>
+              <div class="conf-subtext" id="confSubtext">High Conviction 1:2 Trade Signal</div>
             </div>
 
             <!-- Net Expected Rupee Return based on User's Capital -->
             <div class="pnl-calc-box">
-              <div class="pnl-header">💰 Projected Net Rupee Outcome:</div>
+              <div class="pnl-header">💰 Projected Net Rupee Outcome (1:2 Standard):</div>
               <div class="pnl-row">
-                <span style="color: var(--green);">Target 1 Net Profit:</span>
-                <span style="font-weight: 800; color: var(--green);" id="pnlTarget1">+₹1,900</span>
+                <span style="color: var(--green);">Target 1 (1:2 R:R | 2R):</span>
+                <span style="font-weight: 800; color: var(--green);" id="pnlTarget1">+₹2,500</span>
               </div>
               <div class="pnl-row">
-                <span style="color: var(--gold);">Target 2 Net Profit:</span>
-                <span style="font-weight: 800; color: var(--gold);" id="pnlTarget2">+₹3,550</span>
+                <span style="color: var(--gold);">Target 2 (1:3 R:R | 3R):</span>
+                <span style="font-weight: 800; color: var(--gold);" id="pnlTarget2">+₹3,750</span>
               </div>
               <div class="pnl-row pnl-risk-row">
-                <span style="color: var(--red);">Max Stop-Loss Risk:</span>
+                <span style="color: var(--red);">Max Stop-Loss (1R Risk):</span>
                 <span style="font-weight: 800; color: var(--red);" id="pnlMaxLoss">-₹1,250</span>
               </div>
             </div>
@@ -421,7 +423,7 @@
                   <th>Market Bias</th>
                   <th>Best Call (CE) Setup</th>
                   <th>Best Put (PE) Setup</th>
-                  <th>Target / SL</th>
+                  <th>1:2 Target / Stop Loss</th>
                   <th>Score</th>
                   <th>Capital Affordability</th>
                   <th>Action</th>
@@ -458,9 +460,9 @@
                   <th>Premium (LTP)</th>
                   <th>Margin (1 Lot)</th>
                   <th>Max Lots with Capital</th>
-                  <th>Stop-Loss</th>
-                  <th>Target 1</th>
-                  <th>Target 2</th>
+                  <th>Stop-Loss (1R)</th>
+                  <th>Target 1 (1:2 R:R)</th>
+                  <th>Target 2 (1:3 R:R)</th>
                   <th>Trade Action</th>
                 </tr>
               </thead>

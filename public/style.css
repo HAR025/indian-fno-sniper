@@ -473,6 +473,7 @@ header {
 .badge-tag { font-size: 0.62rem; padding: 2px 5px; border-radius: 3px; background: var(--bg-hover); color: var(--text-muted); }
 .expiry-tag { background: rgba(56, 189, 248, 0.15); color: var(--blue); font-weight: 700; }
 .rank-tag { background: rgba(245, 158, 11, 0.15); color: var(--gold); font-weight: 700; }
+.rr-tag { background: rgba(16, 185, 129, 0.16); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.4); font-weight: 800; letter-spacing: 0.3px; }
 
 .fno-lot { font-size: 0.7rem; color: var(--text-dim); }
 
