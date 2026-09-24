@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Indian FnO Sniper — Secret Trade Finder & Option Chain Scanner</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111622'/><text y='.9em' font-size='80' x='12'>⚡</text></svg>" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111622'/><text y='.9em' font-size='80' x='12'>⚡</text></svg>" />
+  <title>Indian FnO Sniper — Real-Time Trade Finder & Live Market Scanner</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f172a'/><text y='.9em' font-size='80' x='12'>⚡</text></svg>" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f172a'/><text y='.9em' font-size='80' x='12'>⚡</text></svg>" />
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0a0d14" />
+  <meta name="theme-color" content="#090d16" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="FnO Sniper" />
   <link rel="stylesheet" href="style.css" />
-  <!-- Lightweight Charts Library for silent background candle analysis -->
+  <!-- TradingView Lightweight Charts Library -->
   <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+  <!-- TradingView Widget Script -->
+  <script src="https://s3.tradingview.com/tv.js"></script>
 </head>
 <body>
 
@@ -21,17 +23,27 @@
   <header>
     <div class="brand">
       <div class="brand-icon">⚡</div>
-      <div>
+      <div class="brand-info">
         <div class="brand-title">
           <span>Indian FnO Sniper</span>
-          <span class="secret-badge">🔒 Background Scanner Active</span>
+          <span class="pro-badge">PRO RADAR</span>
         </div>
+        <div class="brand-sub" id="sessionPhaseText">Intraday Live Session • 09:15 - 15:30 IST</div>
+      </div>
+    </div>
+
+    <!-- Continuous Scanner Active Indicator & Controller -->
+    <div class="continuous-scanner-pill" id="continuousScannerPill" onclick="toggleContinuousScanner()" title="Click to pause/resume continuous live market scan">
+      <span class="scan-pulse-dot" id="continuousPulseDot"></span>
+      <div class="scan-pill-text">
+        <span class="scan-pill-title" id="continuousScanTitle">LIVE SCANNER: ACTIVE</span>
+        <span class="scan-pill-sub" id="continuousScanSub">Scanning 12 FnO • Every 4s</span>
       </div>
     </div>
 
     <!-- Capital Display Widget in Header -->
     <div class="capital-header-badge" onclick="openCapitalModal()" title="Click to adjust your trading capital">
-      <span style="font-size: 1.1rem;">💼</span>
+      <span class="cap-emoji">💼</span>
       <div class="cap-text-col">
         <span class="cap-label">My Trading Capital</span>
         <span class="cap-val" id="headerCapitalDisplay">₹50,000</span>
@@ -39,12 +51,19 @@
       <button class="btn-edit-cap">✏️ Edit</button>
     </div>
 
+    <!-- Sound & Market Status Group -->
     <div class="header-status">
+      <button class="btn-sound-toggle" id="btnSoundToggle" onclick="toggleSoundAlert()" title="Toggle trade sound chime">
+        <span id="soundIcon">🔔</span>
+        <span id="soundText">Sound ON</span>
+      </button>
+
       <div class="live-indicator" id="marketStatusIndicator">
         <span class="pulse-dot"></span>
         <span id="marketStatusText">NSE / BSE LIVE FEED</span>
       </div>
-      <div id="istClock" style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">
+
+      <div id="istClock" class="ist-clock-badge">
         IST: Loading...
       </div>
     </div>
@@ -64,13 +83,16 @@
         
         <!-- AUTO-FIND BEST TRADE FOR MY CAPITAL BUTTON -->
         <button class="btn-auto-scan-capital" onclick="autoFindBestTradeForCapital()">
-          <span>🎯</span>
-          <span id="btnAutoScanText">Auto-Find Best Trade For ₹50,000</span>
+          <span class="btn-glow-icon">🎯</span>
+          <div class="btn-scan-col">
+            <span class="btn-scan-main" id="btnAutoScanText">Auto-Find Best Trade For ₹50,000</span>
+            <span class="btn-scan-hint">Instant Multi-Confluence Engine Scan</span>
+          </div>
         </button>
 
         <div class="search-box">
           <span class="search-icon">🔍</span>
-          <input type="text" id="searchInput" placeholder="Search Indian FnO (NIFTY, RELIANCE...)" oninput="filterWatchlist()" />
+          <input type="text" id="searchInput" placeholder="Search FnO (NIFTY, BANKNIFTY, RELIANCE...)" oninput="filterWatchlist()" />
         </div>
         <div class="category-tabs">
           <button class="tab-btn active" onclick="setCategory('all')">ALL FnO</button>
@@ -85,44 +107,44 @@
       </div>
     </aside>
 
-    <!-- Main Hero: Trading Terminal & Background Analysis Engine -->
+    <!-- Main Hero: Trading Terminal & Analysis Engine -->
     <main class="terminal-area mobile-active" id="terminalArea">
       
       <!-- Top Active Instrument Toolbar -->
       <div class="terminal-toolbar">
         <div class="active-instrument-meta">
           <div class="active-name" id="activeName">NIFTY 50</div>
-          <div class="active-price-pill up" id="activePricePill">₹23,421.25 (+0.32%)</div>
-          <div class="active-range-text" id="activeRange">H: ₹23,434.05 | L: ₹23,314.80</div>
+          <div class="active-price-pill up" id="activePricePill">₹23,410.65 (+0.35%)</div>
+          <div class="active-range-text" id="activeRange">H: ₹23,414.55 | L: ₹23,349.55</div>
         </div>
 
         <div class="toolbar-actions">
           <!-- Timeframe Selector for Background Scanner -->
           <div class="tf-selector">
-            <span class="tf-label">Scan TF:</span>
+            <span class="tf-label">TF:</span>
             <button class="tf-btn" onclick="switchTimeframe('1m')">1m</button>
             <button class="tf-btn active" onclick="switchTimeframe('5m')">5m</button>
             <button class="tf-btn" onclick="switchTimeframe('15m')">15m</button>
             <button class="tf-btn" onclick="switchTimeframe('1d')">1D</button>
           </div>
 
+          <!-- Deep Scan Now Button -->
+          <button class="btn-scan-now" onclick="triggerDeepScan()">
+            <span>⚡</span> Deep Scan
+          </button>
+
           <!-- Direct TradingView Official Tab Button -->
           <button class="btn-tv-tab" onclick="openInTradingViewTab()" title="Open official live chart on TradingView.com">
             <span>↗️</span> TV Tab
           </button>
-
-          <!-- Re-Scan Button -->
-          <button class="btn-scan-now" onclick="triggerDeepScan()">
-            <span>🔍</span> Re-Scan
-          </button>
         </div>
       </div>
 
-      <!-- Background Scanning Status & Live Candlestick Metrics Bar -->
+      <!-- Live OHLC & Technical Metrics Strip -->
       <div class="background-scanner-bar">
         <div class="scanner-status-pill">
           <span class="scanner-pulse-dot"></span>
-          <span>Background Chart Scanner Active:</span>
+          <span>Active Scanner Focus:</span>
           <b id="chartSymbolTitle" style="color: var(--blue);">NIFTY 50 (5m)</b>
         </div>
         <div class="live-ohlc-metrics">
@@ -130,22 +152,29 @@
           <span>H: <b id="valH">-</b></span>
           <span>L: <b id="valL">-</b></span>
           <span>C: <b id="valC">-</b></span>
-          <span class="ema-chip blue">EMA9: <b id="valE9">-</b></span>
-          <span class="ema-chip gold">EMA21: <b id="valE21">-</b></span>
+          <span class="ema-chip blue">EMA 9: <b id="valE9">-</b></span>
+          <span class="ema-chip gold">EMA 21: <b id="valE21">-</b></span>
+          <span class="ema-chip purple">EMA 50: <b id="valE50">-</b></span>
         </div>
       </div>
 
-      <!-- Scanner Engine Panel (Hero Workspace) -->
+      <!-- Main Workspace Tabs -->
       <div class="scanner-engine-panel">
         
-        <!-- Subtab Navigation -->
+        <!-- Tab Navigation Bar (4 Sleek Smooth Tabs) -->
         <div class="engine-subtabs">
           <div class="subtab-buttons">
             <button class="engine-tab-btn active" id="btnTabSignal" onclick="switchEngineTab('signal')">
-              <span>🎯</span> Top Scalp Trade & Sizing
+              <span>🎯</span> Best Daily Trade & Sizing
+            </button>
+            <button class="engine-tab-btn" id="btnTabChart" onclick="switchEngineTab('chart')">
+              <span>📈</span> Live Chart & Levels
+            </button>
+            <button class="engine-tab-btn" id="btnTabRadar" onclick="switchEngineTab('radar')">
+              <span>⚡</span> All-FnO CE & PE Radar
             </button>
             <button class="engine-tab-btn" id="btnTabChain" onclick="switchEngineTab('chain')">
-              <span>📋</span> Full Option Chain (Strikes Under Capital)
+              <span>📋</span> Full Option Chain
             </button>
           </div>
           <div class="capital-filter-badge" id="chainCapitalNote">
@@ -153,62 +182,84 @@
           </div>
         </div>
 
-        <!-- VIEW 1: Active Signal & Confluence Checklist (3 Sleek Cards) -->
+        <!-- ============================================== -->
+        <!-- TAB 1: BEST DAILY TRADE & EXECUTION DETAILS    -->
+        <!-- ============================================== -->
         <div class="engine-content-area" id="viewSignalArea">
           
-          <!-- Card 1: Recommendation & Capital Allocation -->
+          <!-- Card 1: Recommendation & Trade Execution Card -->
           <div class="recommendation-card">
             <div class="rec-header">
               <div>
                 <span class="signal-type-badge call" id="recSignalBadge">🎯 BUY CALL (CE)</span>
-                <div class="strike-title" id="recStrikeTitle">NIFTY 23350 CE</div>
+                <div class="strike-title" id="recStrikeTitle">NIFTY 23400 CE</div>
+                <div class="strike-subtitle" id="recStrategySubtitle">Intraday Momentum Scalp • High Delta Weekly Expiry</div>
               </div>
-              <div class="rec-expiry-badge">
+              <div class="rec-badge-group">
                 <span class="badge-tag expiry-tag">CURRENT EXPIRY</span>
+                <span class="badge-tag rank-tag" id="recRankTag">⭐ TOP PICK #1</span>
               </div>
             </div>
 
-            <!-- Trade Execution Levels -->
+            <!-- Trade Execution Price Levels -->
             <div class="rec-levels-grid">
               <div class="level-box entry">
-                <div class="level-label">Buy Entry Range</div>
-                <div class="level-value" id="recEntry" style="color: var(--blue);">₹132.3 - ₹137.7</div>
+                <div class="level-label">Optimal Entry Range</div>
+                <div class="level-value" id="recEntry" style="color: var(--blue);">₹132.0 - ₹136.0</div>
+                <div class="level-sub">Enter within zone; do not chase above</div>
               </div>
               <div class="level-box sl">
                 <div class="level-label">Strict Stop-Loss</div>
                 <div class="level-value" id="recSL" style="color: var(--red);">₹108.00</div>
+                <div class="level-sub" id="recSLPoints">-25.0 pts (Risk anchored)</div>
               </div>
               <div class="level-box target">
-                <div class="level-label">Target 1 / Target 2</div>
-                <div class="level-value" id="recTarget" style="color: var(--green);">₹175.5 / ₹210.6</div>
+                <div class="level-label">Target 1 (Book 50%)</div>
+                <div class="level-value" id="recTarget1" style="color: var(--green);">₹172.00</div>
+                <div class="level-sub" id="recT1Points">+38.0 pts (1:1.5 RR)</div>
+              </div>
+              <div class="level-box target-runner">
+                <div class="level-label">Target 2 (Runner)</div>
+                <div class="level-value" id="recTarget2" style="color: var(--gold);">₹205.00</div>
+                <div class="level-sub" id="recT2Points">+71.0 pts (1:2.85 RR)</div>
               </div>
             </div>
 
             <!-- Capital-Based Sizing Breakdown -->
             <div class="capital-sizing-box">
-              <div class="sizing-row">
-                <span class="sizing-tag">🎯 Recommended Purchase:</span>
-                <span class="sizing-num" id="capLotsAllowed">3 Lots (75 Qty)</span>
+              <div class="sizing-header-row">
+                <span class="sizing-tag">💼 Recommended Position Sizing for Your Capital:</span>
+                <span class="sizing-num" id="capLotsAllowed">2 Lots (50 Qty)</span>
               </div>
               <div class="sizing-row">
-                <span style="color: var(--text-muted);">Capital Used / Balance:</span>
-                <span id="capDeployedRatio" style="font-weight:700;">₹10,125 / ₹39,875 (Cash Reserve)</span>
+                <span style="color: var(--text-muted);">Margin Required (Total):</span>
+                <span id="capDeployedAmount" style="font-weight:700; color:#fff;">₹6,700</span>
+              </div>
+              <div class="sizing-row">
+                <span style="color: var(--text-muted);">Safe Cash Balance Retained:</span>
+                <span id="capReserveAmount" style="font-weight:700; color:var(--green);">₹43,300 (86% Reserve)</span>
               </div>
             </div>
 
+            <!-- Action Buttons Footer -->
             <div class="rec-footer">
-              <span id="recRiskReward" class="risk-reward-tag">Risk / Reward: 1 : 2.80</span>
-              <button class="btn-view-chain-inline" onclick="switchEngineTab('chain')">
-                📋 View All Option Strikes ➔
-              </button>
+              <span id="recRiskReward" class="risk-reward-tag">Risk / Reward: 1 : 2.85</span>
+              <div class="rec-footer-actions">
+                <button class="btn-copy-order" onclick="copyTradeOrder()" title="Copy formatted order to clipboard">
+                  <span>📋</span> Copy Order Slip
+                </button>
+                <button class="btn-view-chart-jump" onclick="switchEngineTab('chart')">
+                  <span>📈</span> View On Chart
+                </button>
+              </div>
             </div>
           </div>
 
           <!-- Card 2: Candlestick & Technical Confluence Checklist -->
           <div class="technical-analysis-card">
             <div class="tech-title">
-              <span>📊 Live Candlestick & Price-Action Checklist</span>
-              <span id="candlePatternTag" class="candle-pattern-tag">Bullish Hammer Rejection</span>
+              <span>📊 Live Candlestick & Market Confluence Checklist</span>
+              <span id="candlePatternTag" class="candle-pattern-tag">Bullish Hammer Support Bounce</span>
             </div>
 
             <div class="checklist">
@@ -234,7 +285,7 @@
               </div>
               <div class="check-item">
                 <span class="check-icon">🎯</span>
-                <span class="check-text">Day High/Low:</span>
+                <span class="check-text">Day Range:</span>
                 <span class="check-val up" id="chkDayHL">Near Day High</span>
               </div>
               <div class="check-item">
@@ -245,41 +296,147 @@
             </div>
 
             <div class="setup-rationale-box" id="rationaleText">
-              <b>Setup Reason:</b> Price formed a clean bullish rejection off VWAP with rising volume. Strong Call OI build-up at lower strikes confirms upward momentum.
+              <b>Setup Reason:</b> Price formed a clean bullish rejection off VWAP with rising volume. Strong Call OI build-up confirms upward momentum.
+            </div>
+
+            <!-- Fair Execution Rules & Safeguards (Prevent Mistakes) -->
+            <div class="fair-trading-box">
+              <div class="fair-title">🛡️ High Probability Execution Rules (Zero-Mistake Protocol):</div>
+              <ul class="fair-rules-list">
+                <li><b>Rule 1:</b> Enter strictly within entry range. If price jumps >2% above entry, wait for pullback.</li>
+                <li><b>Rule 2:</b> When Target 1 hits, immediately trail Stop Loss to Entry price for a risk-free trade.</li>
+                <li><b>Rule 3:</b> Strict stop-loss exit if 5-minute candle closes below SL level.</li>
+              </ul>
             </div>
           </div>
 
-          <!-- Card 3: Confidence Score & Net P&L Projection -->
+          <!-- Card 3: Confidence Score & Net Rupee P&L Projection -->
           <div class="confidence-card">
             <div class="conf-circle-wrap">
-              <div class="conf-number" id="confScore">92%</div>
-              <div class="conf-label">Trade Confluence Score</div>
+              <div class="conf-score-pill">
+                <div class="conf-number" id="confScore">94%</div>
+                <div class="conf-label">Institutional Confluence Score</div>
+              </div>
+              <div class="conf-subtext" id="confSubtext">High Conviction Intraday Signal</div>
             </div>
 
             <!-- Net Expected Rupee Return based on User's Capital -->
             <div class="pnl-calc-box">
+              <div class="pnl-header">💰 Projected Net Rupee Outcome:</div>
               <div class="pnl-row">
                 <span style="color: var(--green);">Target 1 Net Profit:</span>
-                <span style="font-weight: 800; color: var(--green);" id="pnlTarget1">+₹3,150</span>
+                <span style="font-weight: 800; color: var(--green);" id="pnlTarget1">+₹1,900</span>
               </div>
               <div class="pnl-row">
                 <span style="color: var(--gold);">Target 2 Net Profit:</span>
-                <span style="font-weight: 800; color: var(--gold);" id="pnlTarget2">+₹5,850</span>
+                <span style="font-weight: 800; color: var(--gold);" id="pnlTarget2">+₹3,550</span>
               </div>
               <div class="pnl-row pnl-risk-row">
                 <span style="color: var(--red);">Max Stop-Loss Risk:</span>
-                <span style="font-weight: 800; color: var(--red);" id="pnlMaxLoss">-₹2,025</span>
+                <span style="font-weight: 800; color: var(--red);" id="pnlMaxLoss">-₹1,250</span>
+              </div>
+            </div>
+
+            <!-- Greeks Snapshot -->
+            <div class="greeks-box">
+              <div class="greeks-title">⚡ Option Greeks Snapshot:</div>
+              <div class="greeks-grid">
+                <div class="greek-item">
+                  <span class="greek-name">Delta:</span>
+                  <span class="greek-val" id="greekDelta">0.52 (ATM)</span>
+                </div>
+                <div class="greek-item">
+                  <span class="greek-name">Theta:</span>
+                  <span class="greek-val" id="greekTheta">-8.4/day</span>
+                </div>
+                <div class="greek-item">
+                  <span class="greek-name">Gamma:</span>
+                  <span class="greek-val" id="greekGamma">High Scalp</span>
+                </div>
+                <div class="greek-item">
+                  <span class="greek-name">IV:</span>
+                  <span class="greek-val" id="greekIV">13.5%</span>
+                </div>
               </div>
             </div>
 
             <div class="risk-allocation-note">
-              ⚡ Controlled 2% Risk Allocation
+              🛡️ Capital Preservation Protocol: Max 2.5% Account Risk
             </div>
           </div>
 
         </div>
 
-        <!-- VIEW 2: FULL OPTION CHAIN TABLE UNDER USER CAPITAL -->
+        <!-- ============================================== -->
+        <!-- TAB 2: LIVE CHART & TRADE LEVELS OVERLAY      -->
+        <!-- ============================================== -->
+        <div class="chart-workspace-container" id="viewChartArea">
+          <div class="chart-toolbar-row">
+            <div class="chart-instrument-title">
+              <span id="chartViewTitle">NIFTY 50 • 5-Minute Chart</span>
+              <span class="chart-mode-pill" id="chartViewPill">PRO LIGHTWEIGHT ENGINE</span>
+            </div>
+
+            <!-- Overlaid levels quick summary -->
+            <div class="chart-levels-legend">
+              <span class="legend-pill entry">Entry: <b id="chartLegendEntry">-</b></span>
+              <span class="legend-pill sl">SL: <b id="chartLegendSL">-</b></span>
+              <span class="legend-pill target">T1: <b id="chartLegendT1">-</b></span>
+              <span class="legend-pill runner">T2: <b id="chartLegendT2">-</b></span>
+            </div>
+
+            <div class="chart-engine-toggle">
+              <button class="btn-engine-switch active" id="btnEngineNative" onclick="setChartEngine('native')">Native Pro Chart</button>
+              <button class="btn-engine-switch" id="btnEngineTV" onclick="setChartEngine('tv')">TradingView Widget</button>
+            </div>
+          </div>
+
+          <div class="chart-canvas-wrapper">
+            <div id="tv_lightweight_chart"></div>
+            <div id="tv_chart_container" style="display: none;"></div>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- TAB 3: ALL-FNO LIVE CE & PE RADAR SCANNER      -->
+        <!-- ============================================== -->
+        <div class="radar-workspace-container" id="viewRadarArea">
+          <div class="radar-header-bar">
+            <div class="radar-title-col">
+              <div class="radar-title">⚡ All-FnO Live Calls (CE) & Puts (PE) Radar</div>
+              <div class="radar-sub" id="radarScanTimestamp">Continuously scanning 12 FnO instruments for the highest probability daily trades...</div>
+            </div>
+            <div class="radar-filter-actions">
+              <button class="btn-radar-refresh" onclick="refreshRadarScanner()">
+                <span>🔄</span> Scan Market Now
+              </button>
+            </div>
+          </div>
+
+          <div class="radar-table-wrap">
+            <table class="radar-table">
+              <thead>
+                <tr>
+                  <th>Instrument & Price</th>
+                  <th>Market Bias</th>
+                  <th>Best Call (CE) Setup</th>
+                  <th>Best Put (PE) Setup</th>
+                  <th>Target / SL</th>
+                  <th>Score</th>
+                  <th>Capital Affordability</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="radarTableBody">
+                <!-- Injected via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- TAB 4: FULL OPTION CHAIN TABLE UNDER CAPITAL  -->
+        <!-- ============================================== -->
         <div class="option-chain-container" id="viewChainArea">
           <div class="chain-header-bar">
             <div class="chain-title">
@@ -316,30 +473,37 @@
 
       </div>
 
-      <!-- Silent Background Chart Canvas Container (Hidden from visible UI, keeps background chart scanner functional) -->
-      <div style="display: none;" aria-hidden="true">
-        <div id="tv_lightweight_chart"></div>
-        <div id="tv_chart_container"></div>
-      </div>
-
       <!-- Loading / Scanning Radar Overlay -->
       <div class="scan-overlay" id="scanOverlay">
         <div class="scan-radar"></div>
         <div class="scan-msg" id="scanStatusMsg">Scanning Live Candles & Option Chain OI...</div>
       </div>
 
+      <!-- Toast Notification Container -->
+      <div class="toast-notification" id="toastNotification">
+        <span id="toastMessage">Trade Order Copied to Clipboard!</span>
+      </div>
+
     </main>
   </div>
 
-  <!-- Mobile Bottom Navigation Bar -->
+  <!-- Mobile Bottom Navigation Bar (5 Sleek Tabs) -->
   <nav class="mobile-nav-bar">
     <button class="mobile-nav-btn active" id="mNavSignal" onclick="switchMobileView('signal')">
       <span class="m-icon">🎯</span>
       <span class="m-text">Best Trade</span>
     </button>
+    <button class="mobile-nav-btn" id="mNavChart" onclick="switchMobileView('chart')">
+      <span class="m-icon">📈</span>
+      <span class="m-text">Chart</span>
+    </button>
+    <button class="mobile-nav-btn" id="mNavRadar" onclick="switchMobileView('radar')">
+      <span class="m-icon">⚡</span>
+      <span class="m-text">Radar</span>
+    </button>
     <button class="mobile-nav-btn" id="mNavChain" onclick="switchMobileView('chain')">
       <span class="m-icon">📋</span>
-      <span class="m-text">Option Chain</span>
+      <span class="m-text">Options</span>
     </button>
     <button class="mobile-nav-btn" id="mNavWatchlist" onclick="switchMobileView('watchlist')">
       <span class="m-icon">📑</span>
@@ -353,8 +517,8 @@
       <div class="modal-title-row">
         <span class="modal-icon">💰</span>
         <div>
-          <div class="modal-title">Set Your Trading Capital</div>
-          <div class="modal-desc">Enter the amount of capital you have available to purchase trades today. The tool will scan all Indian FnO options and find the best trade matching your exact capital.</div>
+          <div class="modal-title">Set Your Active Trading Capital</div>
+          <div class="modal-desc">Enter the amount of capital available for FnO trading today. The tool will scan all Indian FnO options and recommend optimal lot sizing and the highest probability trade.</div>
         </div>
       </div>
 
