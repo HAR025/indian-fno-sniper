@@ -1371,6 +1371,436 @@ header {
 }
 
 /* ========================================================= */
+/* TAB 4: TRADEFINDER PRO SUITE (5-IN-1 MODULES)            */
+/* ========================================================= */
+.tradefinder-workspace-container {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  background: var(--bg-panel);
+  overflow: hidden;
+}
+
+.tf-suite-header {
+  padding: 12px 18px;
+  background: #111728;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.tf-suite-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tf-suite-logo-icon {
+  font-size: 1.5rem;
+}
+
+.tf-suite-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--blue);
+  letter-spacing: 0.3px;
+}
+
+.tf-suite-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.btn-tf-scan-sync {
+  background: linear-gradient(135deg, #0284c7, #10b981);
+  color: #05101f;
+  border: none;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-tf-scan-sync:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px var(--green);
+}
+
+.tf-modules-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tf-module-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tf-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+}
+
+.tf-card-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tf-live-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--green);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.tf-tag-purple {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(192, 132, 252, 0.12);
+  color: var(--purple);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.tf-tag-blue {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--blue);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.tf-tag-green {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--green);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+/* 1. Option Clock Styles */
+.option-clock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.clock-slot-card {
+  background: var(--bg-card-sub);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.clock-slot-card.current {
+  border-color: var(--blue);
+  background: rgba(56, 189, 248, 0.06);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+}
+
+.clock-slot-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.clock-time-text {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.clock-phase-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.clock-phase-tag.active { background: var(--green-glow); color: var(--green); }
+.clock-phase-tag.past { background: rgba(255, 255, 255, 0.05); color: var(--text-dim); }
+.clock-phase-tag.upcoming { background: rgba(245, 158, 11, 0.1); color: var(--gold); }
+
+.clock-flow-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.clock-bar-bg {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+}
+
+.clock-bar-call { background: var(--green); height: 100%; }
+.clock-bar-put { background: var(--red); height: 100%; }
+
+/* Dual Grid: Option Apex + Sector Scope */
+.tf-dual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .tf-dual-grid { grid-template-columns: 1fr; }
+}
+
+/* 2. Option Apex Styles */
+.apex-content-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.apex-hero-card {
+  background: linear-gradient(135deg, rgba(192, 132, 252, 0.1), rgba(56, 189, 248, 0.08));
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.apex-strike-title {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.apex-strike-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.apex-score-badge {
+  background: rgba(192, 132, 252, 0.2);
+  border: 1px solid var(--purple);
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-align: right;
+}
+
+.apex-score-val {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--purple);
+}
+
+.apex-score-lbl {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.apex-levels-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.apex-lvl-box {
+  background: var(--bg-card-sub);
+  border: 1px solid var(--border-color);
+  padding: 6px 8px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.apex-lvl-lbl { font-size: 0.65rem; color: var(--text-dim); }
+.apex-lvl-val { font-size: 0.84rem; font-weight: 800; margin-top: 2px; }
+
+/* 3. Sector Scope Styles */
+.sector-scope-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.sector-card {
+  background: var(--bg-card-sub);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sector-card.bullish { border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.05); }
+.sector-card.bearish { border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.05); }
+
+.sector-name { font-size: 0.78rem; font-weight: 800; color: #fff; }
+.sector-chg { font-size: 0.85rem; font-weight: 900; }
+.sector-chg.up { color: var(--green); }
+.sector-chg.down { color: var(--red); }
+.sector-driver { font-size: 0.65rem; color: var(--text-dim); }
+
+/* 4. Insider Strategy Table Styles */
+.tf-oi-filter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.oi-chip {
+  background: var(--bg-card-sub);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.oi-chip.active { background: var(--blue); color: #05101f; border-color: var(--blue); }
+.oi-chip.long-build.active { background: var(--green); color: #05101f; border-color: var(--green); }
+.oi-chip.short-cover.active { background: var(--gold); color: #05101f; border-color: var(--gold); }
+.oi-chip.short-build.active { background: var(--red); color: #fff; border-color: var(--red); }
+.oi-chip.long-unwind.active { background: #f97316; color: #fff; border-color: #f97316; }
+
+.insider-strategy-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.insider-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+  text-align: left;
+}
+
+.insider-table th {
+  background: #141c2c;
+  color: var(--text-muted);
+  padding: 8px 10px;
+  font-weight: 700;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.insider-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(34, 45, 70, 0.3);
+  vertical-align: middle;
+}
+
+.insider-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.insider-badge.long-build { background: rgba(16, 185, 129, 0.18); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.4); }
+.insider-badge.short-cover { background: rgba(245, 158, 11, 0.18); color: var(--gold); border: 1px solid rgba(245, 158, 11, 0.4); }
+.insider-badge.short-build { background: rgba(244, 63, 94, 0.18); color: var(--red); border: 1px solid rgba(244, 63, 94, 0.4); }
+.insider-badge.long-unwind { background: rgba(249, 115, 22, 0.18); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.4); }
+
+/* 5. Market Pulse Styles */
+.market-pulse-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.pulse-card {
+  background: var(--bg-card-sub);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pulse-card:hover {
+  border-color: var(--blue);
+  background: rgba(56, 189, 248, 0.05);
+  transform: translateY(-2px);
+}
+
+.pulse-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pulse-name { font-size: 0.82rem; font-weight: 800; color: #fff; }
+.pulse-surge-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--green);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.pulse-metric-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.pulse-metric-val { font-weight: 700; color: #fff; }
+
+/* ========================================================= */
 /* CAPITAL MODAL & SCANNER OVERLAY                          */
 /* ========================================================= */
 .capital-modal-backdrop {

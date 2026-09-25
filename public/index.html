@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Indian FnO Sniper — Real-Time Trade Finder & Live Market Scanner</title>
+  <title>HBTRADE — Institutional Indian FnO Trade Finder & Live Market Scanner</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f172a'/><text y='.9em' font-size='80' x='12'>⚡</text></svg>" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f172a'/><text y='.9em' font-size='80' x='12'>⚡</text></svg>" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#090d16" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="FnO Sniper" />
+  <meta name="apple-mobile-web-app-title" content="HBTRADE" />
   <link rel="stylesheet" href="style.css" />
   <!-- TradingView Lightweight Charts Library -->
   <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
@@ -25,8 +25,8 @@
       <div class="brand-icon">⚡</div>
       <div class="brand-info">
         <div class="brand-title">
-          <span>Indian FnO Sniper</span>
-          <span class="pro-badge">PRO RADAR</span>
+          <span>HBTRADE</span>
+          <span class="pro-badge">INSTITUTIONAL RADAR</span>
         </div>
         <div class="brand-sub" id="sessionPhaseText">Intraday Live Session • 09:15 - 15:30 IST</div>
       </div>
@@ -161,7 +161,7 @@
       <!-- Main Workspace Tabs -->
       <div class="scanner-engine-panel">
         
-        <!-- Tab Navigation Bar (4 Sleek Smooth Tabs) -->
+        <!-- Tab Navigation Bar (Now 5 Sleek Tabs including TradeFinder Suite) -->
         <div class="engine-subtabs">
           <div class="subtab-buttons">
             <button class="engine-tab-btn active" id="btnTabSignal" onclick="switchEngineTab('signal')">
@@ -172,6 +172,9 @@
             </button>
             <button class="engine-tab-btn" id="btnTabRadar" onclick="switchEngineTab('radar')">
               <span>⚡</span> All-FnO CE & PE Radar
+            </button>
+            <button class="engine-tab-btn" id="btnTabTradeFinder" onclick="switchEngineTab('tradefinder')">
+              <span>🔬</span> TradeFinder Pro Suite
             </button>
             <button class="engine-tab-btn" id="btnTabChain" onclick="switchEngineTab('chain')">
               <span>📋</span> Full Option Chain
@@ -437,7 +440,125 @@
         </div>
 
         <!-- ============================================== -->
-        <!-- TAB 4: FULL OPTION CHAIN TABLE UNDER CAPITAL  -->
+        <!-- TAB 4: TRADEFINDER PRO SUITE (5-IN-1 ENGINES)  -->
+        <!-- ============================================== -->
+        <div class="tradefinder-workspace-container" id="viewTradeFinderArea" style="display: none;">
+          
+          <!-- TradeFinder Header Bar -->
+          <div class="tf-suite-header">
+            <div class="tf-suite-title-group">
+              <span class="tf-suite-logo-icon">🔬</span>
+              <div>
+                <div class="tf-suite-title">TradeFinder Pro Analytics Suite</div>
+                <div class="tf-suite-desc">5-in-1 Institutional Decision Engine: Option Clock • Option Apex • Insider Strategy • Market Pulse • Sector Scope</div>
+              </div>
+            </div>
+            <div class="tf-suite-actions">
+              <button class="btn-tf-scan-sync" onclick="syncTradeFinderSuite()">
+                <span>⚡</span> Sync Institutional Flow
+              </button>
+            </div>
+          </div>
+
+          <!-- TradeFinder 5-in-1 Modules Container -->
+          <div class="tf-modules-scroll">
+            
+            <!-- Module 1: Option Clock & Session Flow -->
+            <div class="tf-module-card">
+              <div class="tf-card-header">
+                <div class="tf-card-title">
+                  <span>⏱️ 1. Option Clock — Time-Slot Institutional Accumulation</span>
+                </div>
+                <span class="tf-live-badge">MARKET HOURS: 09:15 - 15:30 IST</span>
+              </div>
+              <div class="option-clock-grid" id="optionClockGrid">
+                <!-- Injected via app.js -->
+              </div>
+            </div>
+
+            <!-- Module 2 & 3: Option Apex + Sector Scope Row -->
+            <div class="tf-dual-grid">
+              
+              <!-- Module 2: Option Apex -->
+              <div class="tf-module-card">
+                <div class="tf-card-header">
+                  <div class="tf-card-title">
+                    <span>⚡ 2. Option Apex — High-Conviction Index Strike Identifier</span>
+                  </div>
+                  <span class="tf-tag-purple">ATM / OTM VELOCITY</span>
+                </div>
+                <div class="apex-content-box" id="optionApexContent">
+                  <!-- Injected via app.js -->
+                </div>
+              </div>
+
+              <!-- Module 3: Sector Scope -->
+              <div class="tf-module-card">
+                <div class="tf-card-header">
+                  <div class="tf-card-title">
+                    <span>🌐 3. Sector Scope — Sectoral Momentum Heatmap</span>
+                  </div>
+                  <span class="tf-tag-blue">NIFTY DRIVER BASKETS</span>
+                </div>
+                <div class="sector-scope-grid" id="sectorScopeGrid">
+                  <!-- Injected via app.js -->
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Module 4: Insider Strategy (OI & Price Action Categorizer) -->
+            <div class="tf-module-card">
+              <div class="tf-card-header">
+                <div class="tf-card-title">
+                  <span>📊 4. Insider Strategy — Open Interest (OI) & Price Classifier</span>
+                </div>
+                <div class="tf-oi-filter-chips">
+                  <button class="oi-chip active" onclick="filterInsiderOI('all')">ALL (12)</button>
+                  <button class="oi-chip long-build" onclick="filterInsiderOI('Long Build-Up')">Long Build-Up</button>
+                  <button class="oi-chip short-cover" onclick="filterInsiderOI('Short Covering')">Short Covering</button>
+                  <button class="oi-chip short-build" onclick="filterInsiderOI('Short Build-Up')">Short Build-Up</button>
+                  <button class="oi-chip long-unwind" onclick="filterInsiderOI('Long Unwinding')">Long Unwinding</button>
+                </div>
+              </div>
+              <div class="insider-strategy-table-wrap">
+                <table class="insider-table">
+                  <thead>
+                    <tr>
+                      <th>Instrument</th>
+                      <th>LTP & Change</th>
+                      <th>Insider Classification</th>
+                      <th>OI Delta Velocity</th>
+                      <th>Smart Money Flow</th>
+                      <th>Institutional Bias</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="insiderTableBody">
+                    <!-- Injected via app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Module 5: Market Pulse (Top Volume Surges & Breakouts) -->
+            <div class="tf-module-card">
+              <div class="tf-card-header">
+                <div class="tf-card-title">
+                  <span>🔥 5. Market Pulse — Volume Surges & Intraday Range Expansion</span>
+                </div>
+                <span class="tf-tag-green">ACTIVE SMART MONEY SPIKES</span>
+              </div>
+              <div class="market-pulse-grid" id="marketPulseGrid">
+                <!-- Injected via app.js -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- TAB 5: FULL OPTION CHAIN TABLE UNDER CAPITAL  -->
         <!-- ============================================== -->
         <div class="option-chain-container" id="viewChainArea">
           <div class="chain-header-bar">
@@ -489,7 +610,7 @@
     </main>
   </div>
 
-  <!-- Mobile Bottom Navigation Bar (5 Sleek Tabs) -->
+  <!-- Mobile Bottom Navigation Bar (6 Sleek Tabs) -->
   <nav class="mobile-nav-bar">
     <button class="mobile-nav-btn active" id="mNavSignal" onclick="switchMobileView('signal')">
       <span class="m-icon">🎯</span>
@@ -502,6 +623,10 @@
     <button class="mobile-nav-btn" id="mNavRadar" onclick="switchMobileView('radar')">
       <span class="m-icon">⚡</span>
       <span class="m-text">Radar</span>
+    </button>
+    <button class="mobile-nav-btn" id="mNavTradeFinder" onclick="switchMobileView('tradefinder')">
+      <span class="m-icon">🔬</span>
+      <span class="m-text">TradeFinder</span>
     </button>
     <button class="mobile-nav-btn" id="mNavChain" onclick="switchMobileView('chain')">
       <span class="m-icon">📋</span>

@@ -1,11 +1,11 @@
 {
-  "name": "Indian FnO Sniper Terminal",
-  "short_name": "FnO Sniper",
-  "description": "Indian Futures & Options Trade Finder & Candlestick Scanner",
+  "name": "HBTRADE — Institutional FnO Trade Finder & Scanner",
+  "short_name": "HBTRADE",
+  "description": "HBTRADE — Institutional Indian Futures & Options Trade Finder, TradeFinder Suite & 1:2 R:R Terminal",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0a0e17",
-  "theme_color": "#0a0e17",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
   "icons": [
     {
       "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23111622%22/><text y=%22.9em%22 font-size=%2280%22 x=%2212%22>⚡</text></svg>",
