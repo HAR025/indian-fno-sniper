@@ -1800,6 +1800,71 @@ header {
 
 .pulse-metric-val { font-weight: 700; color: #fff; }
 
+/* 6. Swing Spectrum Styles */
+.swing-spectrum-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.swing-card {
+  background: var(--bg-card-sub);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.swing-card:hover {
+  border-color: var(--gold);
+  background: rgba(245, 158, 11, 0.05);
+  transform: translateY(-2px);
+}
+
+.swing-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.swing-name { font-size: 0.85rem; font-weight: 800; color: #fff; }
+.swing-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.swing-tag.breakout { background: rgba(56, 189, 248, 0.15); color: var(--blue); border: 1px solid rgba(56, 189, 248, 0.3); }
+.swing-tag.reversal { background: rgba(16, 185, 129, 0.15); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); }
+
+/* 7. FII & DII Tracker Styles */
+.fii-dii-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.fii-dii-box {
+  background: var(--bg-card-sub);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fii-dii-label { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; }
+.fii-dii-val { font-size: 1.1rem; font-weight: 900; }
+.fii-dii-val.buy { color: var(--green); }
+.fii-dii-val.sell { color: var(--red); }
+.fii-dii-desc { font-size: 0.68rem; color: var(--text-muted); }
+
 /* ========================================================= */
 /* CAPITAL MODAL & SCANNER OVERLAY                          */
 /* ========================================================= */

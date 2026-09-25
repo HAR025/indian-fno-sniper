@@ -450,7 +450,7 @@
               <span class="tf-suite-logo-icon">🔬</span>
               <div>
                 <div class="tf-suite-title">TradeFinder Pro Analytics Suite</div>
-                <div class="tf-suite-desc">5-in-1 Institutional Decision Engine: Option Clock • Option Apex • Insider Strategy • Market Pulse • Sector Scope</div>
+                <div class="tf-suite-desc">7-in-1 Institutional Suite: Option Clock • Option Apex • Sector Scope • Insider Strategy • Market Pulse • Swing Spectrum • FII/DII Net Flow</div>
               </div>
             </div>
             <div class="tf-suite-actions">
@@ -550,6 +550,36 @@
                 <span class="tf-tag-green">ACTIVE SMART MONEY SPIKES</span>
               </div>
               <div class="market-pulse-grid" id="marketPulseGrid">
+                <!-- Injected via app.js -->
+              </div>
+            </div>
+
+            <!-- Module 6: Swing Spectrum (Breakout & Reversal Scanner) -->
+            <div class="tf-module-card">
+              <div class="tf-card-header">
+                <div class="tf-card-title">
+                  <span>🎯 6. Swing Spectrum — Breakout & Trend Reversal Radar</span>
+                </div>
+                <div class="tf-oi-filter-chips">
+                  <button class="oi-chip active" id="chipSwingAll" onclick="filterSwingSpectrum('all')">ALL SETUPS</button>
+                  <button class="oi-chip long-build" id="chipSwingBO" onclick="filterSwingSpectrum('Breakout')">Bullish Breakout (BO)</button>
+                  <button class="oi-chip short-cover" id="chipSwingRev" onclick="filterSwingSpectrum('Reversal')">Key Support Reversal</button>
+                </div>
+              </div>
+              <div class="swing-spectrum-grid" id="swingSpectrumGrid">
+                <!-- Injected via app.js -->
+              </div>
+            </div>
+
+            <!-- Module 7: FII & DII Institutional Net Flow Tracker -->
+            <div class="tf-module-card">
+              <div class="tf-card-header">
+                <div class="tf-card-title">
+                  <span>🏛️ 7. FII & DII Institutional Positioning & Net Flow</span>
+                </div>
+                <span class="tf-live-badge">DAILY PRO/CLIENT RATIO</span>
+              </div>
+              <div class="fii-dii-grid" id="fiiDiiGrid">
                 <!-- Injected via app.js -->
               </div>
             </div>

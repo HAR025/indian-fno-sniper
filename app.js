@@ -1769,6 +1769,8 @@ function renderTradeFinderSuite() {
   renderSectorScope();
   renderInsiderStrategyTable();
   renderMarketPulse();
+  renderSwingSpectrum();
+  renderFIIDIITracker();
 }
 
 // 1. Option Clock — Time-slot institutional accumulation
@@ -2042,4 +2044,89 @@ function renderMarketPulse() {
     `;
   }).join('');
 }
+
+// 6. Swing Spectrum (Breakout & Reversal Scanner)
+let swingSpectrumFilter = 'all';
+
+function filterSwingSpectrum(type) {
+  swingSpectrumFilter = type;
+  ['chipSwingAll', 'chipSwingBO', 'chipSwingRev'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+
+  if (type === 'all') {
+    const el = document.getElementById('chipSwingAll');
+    if (el) el.classList.add('active');
+  } else if (type === 'Breakout') {
+    const el = document.getElementById('chipSwingBO');
+    if (el) el.classList.add('active');
+  } else if (type === 'Reversal') {
+    const el = document.getElementById('chipSwingRev');
+    if (el) el.classList.add('active');
+  }
+
+  renderSwingSpectrum();
+}
+
+function renderSwingSpectrum() {
+  const container = document.getElementById('swingSpectrumGrid');
+  if (!container) return;
+
+  const swingCandidates = [
+    { name: 'BAJAJ FINANCE', type: 'Breakout', ltp: '₹1,035.00', target: '₹1,065.00', sl: '₹1,018.00', rr: '1 : 2.10', trigger: '5-Day High Resistance Breakout', id: 'bajfinance' },
+    { name: 'RELIANCE', type: 'Reversal', ltp: '₹1,244.40', target: '₹1,272.00', sl: '₹1,230.00', rr: '1 : 2.20', trigger: 'VWAP Double Bottom Support Bounce', id: 'reliance' },
+    { name: 'SBIN', type: 'Breakout', ltp: '₹992.10', target: '₹1,015.00', sl: '₹982.00', rr: '1 : 2.30', trigger: 'Multi-Day Volume Shelf Breakout', id: 'sbin' },
+    { name: 'ICICI BANK', type: 'Reversal', ltp: '₹1,338.10', target: '₹1,360.00', sl: '₹1,326.00', rr: '1 : 2.05', trigger: 'Golden 50 EMA Trend Reversal', id: 'icicibank' }
+  ];
+
+  const filtered = swingSpectrumFilter === 'all'
+    ? swingCandidates
+    : swingCandidates.filter(c => c.type === swingSpectrumFilter);
+
+  container.innerHTML = filtered.map(c => {
+    const isBO = c.type === 'Breakout';
+    return `
+      <div class="swing-card" onclick="selectInstrumentFromId('${c.id}')">
+        <div class="swing-card-top">
+          <span class="swing-name">${c.name}</span>
+          <span class="swing-tag ${isBO ? 'breakout' : 'reversal'}">${c.type}</span>
+        </div>
+        <div style="font-size:0.75rem; color:#fff; font-weight:700;">LTP: ${c.ltp}</div>
+        <div style="font-size:0.7rem; color:var(--text-dim);">${c.trigger}</div>
+        <div style="display:flex; justify-content:space-between; font-size:0.72rem; margin-top:4px;">
+          <span style="color:var(--green); font-weight:700;">Target: ${c.target}</span>
+          <span style="color:var(--red); font-weight:700;">SL: ${c.sl}</span>
+        </div>
+        <div style="font-size:0.68rem; color:var(--gold); font-weight:700; margin-top:2px;">
+          Risk-to-Reward: ${c.rr}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// 7. FII & DII Institutional Net Flow Tracker
+function renderFIIDIITracker() {
+  const container = document.getElementById('fiiDiiGrid');
+  if (!container) return;
+
+  const data = [
+    { label: 'FII Cash Market Net', val: '+₹1,248.5 Cr', isBuy: true, desc: 'Aggressive institutional buying in large-cap indices' },
+    { label: 'DII Cash Market Net', val: '+₹2,180.2 Cr', isBuy: true, desc: 'Domestic mutual fund SIP inflows supporting equity' },
+    { label: 'FII Index Futures Long %', val: '58.4%', isBuy: true, desc: 'Above 50% baseline indicating bullish structural bias' },
+    { label: 'Client (Retail) Long/Short', val: '46.2% Short', isBuy: false, desc: 'Retail participants trapped short; short squeeze in play' }
+  ];
+
+  container.innerHTML = data.map(d => {
+    return `
+      <div class="fii-dii-box">
+        <div class="fii-dii-label">${d.label}</div>
+        <div class="fii-dii-val ${d.isBuy ? 'buy' : 'sell'}">${d.val}</div>
+        <div class="fii-dii-desc">${d.desc}</div>
+      </div>
+    `;
+  }).join('');
+}
+
 
