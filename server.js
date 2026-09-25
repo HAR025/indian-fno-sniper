@@ -20,13 +20,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:NIFTY',
     yfSymbol: '^NSEI',
     category: 'Index',
-    basePrice: 23040.30,
+    basePrice: 23152.10,
     lotSize: 75,
     strikeStep: 50,
-    change: '-1.24%',
-    isPositive: false,
-    dayHigh: 23489.00,
-    dayLow: 23021.10
+    change: '+0.39%',
+    isPositive: true,
+    dayHigh: 23162.70,
+    dayLow: 23020.95
   },
   {
     id: 'banknifty',
@@ -37,13 +37,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:BANKNIFTY',
     yfSymbol: '^NSEBANK',
     category: 'Index',
-    basePrice: 55522.40,
+    basePrice: 55718.00,
     lotSize: 30,
     strikeStep: 100,
-    change: '-1.49%',
-    isPositive: false,
-    dayHigh: 56671.00,
-    dayLow: 55341.60
+    change: '+0.50%',
+    isPositive: true,
+    dayHigh: 55762.60,
+    dayLow: 55373.75
   },
   {
     id: 'sensex',
@@ -54,13 +54,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'BSE:SENSEX',
     yfSymbol: '^BSESN',
     category: 'Index',
-    basePrice: 73609.66,
+    basePrice: 73953.64,
     lotSize: 20,
     strikeStep: 100,
-    change: '-1.18%',
-    isPositive: false,
-    dayHigh: 75034.16,
-    dayLow: 73447.36
+    change: '+0.51%',
+    isPositive: true,
+    dayHigh: 74020.00,
+    dayLow: 73477.77
   },
   {
     id: 'finnifty',
