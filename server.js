@@ -20,13 +20,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:NIFTY',
     yfSymbol: '^NSEI',
     category: 'Index',
-    basePrice: 23346.40,
-    lotSize: 25,
+    basePrice: 23040.30,
+    lotSize: 75,
     strikeStep: 50,
-    change: '+0.68%',
-    isPositive: true,
-    dayHigh: 23450.00,
-    dayLow: 23280.20
+    change: '-1.24%',
+    isPositive: false,
+    dayHigh: 23489.00,
+    dayLow: 23021.10
   },
   {
     id: 'banknifty',
@@ -37,13 +37,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:BANKNIFTY',
     yfSymbol: '^NSEBANK',
     category: 'Index',
-    basePrice: 56358.70,
-    lotSize: 15,
+    basePrice: 55522.40,
+    lotSize: 30,
     strikeStep: 100,
-    change: '+1.12%',
-    isPositive: true,
-    dayHigh: 56620.00,
-    dayLow: 56150.00
+    change: '-1.49%',
+    isPositive: false,
+    dayHigh: 56671.00,
+    dayLow: 55341.60
   },
   {
     id: 'sensex',
@@ -54,13 +54,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'BSE:SENSEX',
     yfSymbol: '^BSESN',
     category: 'Index',
-    basePrice: 83180.20,
-    lotSize: 10,
+    basePrice: 73609.66,
+    lotSize: 20,
     strikeStep: 100,
-    change: '+0.72%',
-    isPositive: true,
-    dayHigh: 83350.00,
-    dayLow: 82890.00
+    change: '-1.18%',
+    isPositive: false,
+    dayHigh: 75034.16,
+    dayLow: 73447.36
   },
   {
     id: 'finnifty',
@@ -71,13 +71,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:FINNIFTY',
     yfSymbol: 'NIFTY_FIN_SERVICE.NS',
     category: 'Index',
-    basePrice: 24150.30,
-    lotSize: 25,
+    basePrice: 24984.10,
+    lotSize: 65,
     strikeStep: 50,
-    change: '+0.54%',
-    isPositive: true,
-    dayHigh: 24220.00,
-    dayLow: 24080.00
+    change: '-2.14%',
+    isPositive: false,
+    dayHigh: 25652.70,
+    dayLow: 24901.15
   },
   {
     id: 'reliance',
@@ -88,13 +88,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:RELIANCE',
     yfSymbol: 'RELIANCE.NS',
     category: 'Stock',
-    basePrice: 2985.40,
-    lotSize: 250,
+    basePrice: 1215.90,
+    lotSize: 500,
     strikeStep: 20,
-    change: '+1.45%',
-    isPositive: true,
-    dayHigh: 3010.00,
-    dayLow: 2955.00
+    change: '-1.55%',
+    isPositive: false,
+    dayHigh: 1252.80,
+    dayLow: 1215.00
   },
   {
     id: 'hdfcbank',
@@ -105,13 +105,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:HDFCBANK',
     yfSymbol: 'HDFCBANK.NS',
     category: 'Stock',
-    basePrice: 1675.20,
+    basePrice: 734.70,
     lotSize: 550,
     strikeStep: 10,
-    change: '+0.95%',
+    change: '+0.53%',
     isPositive: true,
-    dayHigh: 1688.00,
-    dayLow: 1662.00
+    dayHigh: 749.30,
+    dayLow: 725.95
   },
   {
     id: 'icicibank',
@@ -122,30 +122,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:ICICIBANK',
     yfSymbol: 'ICICIBANK.NS',
     category: 'Stock',
-    basePrice: 1245.80,
+    basePrice: 1327.30,
     lotSize: 700,
     strikeStep: 10,
-    change: '+1.20%',
-    isPositive: true,
-    dayHigh: 1255.00,
-    dayLow: 1232.00
-  },
-  {
-    id: 'tatamotors',
-    name: 'TATA MOTORS',
-    symbol: 'BSE:TATAMOTORS',
-    tvSymbol: 'BSE:TATAMOTORS',
-    etfSymbol: 'NSE:TATAMOTORS',
-    officialSymbol: 'NSE:TATAMOTORS',
-    yfSymbol: 'TATAMOTORS.NS',
-    category: 'Stock',
-    basePrice: 978.60,
-    lotSize: 1425,
-    strikeStep: 10,
-    change: '-0.85%',
+    change: '-1.34%',
     isPositive: false,
-    dayHigh: 992.00,
-    dayLow: 971.00
+    dayHigh: 1351.90,
+    dayLow: 1326.20
   },
   {
     id: 'tcs',
@@ -156,13 +139,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:TCS',
     yfSymbol: 'TCS.NS',
     category: 'Stock',
-    basePrice: 4290.00,
-    lotSize: 175,
+    basePrice: 2079.20,
+    lotSize: 225,
     strikeStep: 50,
-    change: '+0.40%',
-    isPositive: true,
-    dayHigh: 4320.00,
-    dayLow: 4265.00
+    change: '-0.52%',
+    isPositive: false,
+    dayHigh: 2144.50,
+    dayLow: 2039.80
   },
   {
     id: 'infy',
@@ -173,13 +156,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:INFY',
     yfSymbol: 'INFY.NS',
     category: 'Stock',
-    basePrice: 1912.30,
+    basePrice: 994.90,
     lotSize: 400,
     strikeStep: 20,
-    change: '-0.35%',
+    change: '-4.30%',
     isPositive: false,
-    dayHigh: 1930.00,
-    dayLow: 1898.00
+    dayHigh: 1044.50,
+    dayLow: 991.70
   },
   {
     id: 'sbin',
@@ -190,13 +173,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:SBIN',
     yfSymbol: 'SBIN.NS',
     category: 'Stock',
-    basePrice: 792.40,
-    lotSize: 1500,
+    basePrice: 979.30,
+    lotSize: 750,
     strikeStep: 5,
-    change: '+1.05%',
-    isPositive: true,
-    dayHigh: 798.50,
-    dayLow: 785.00
+    change: '-1.23%',
+    isPositive: false,
+    dayHigh: 999.20,
+    dayLow: 975.90
   },
   {
     id: 'bajfinance',
@@ -207,13 +190,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:BAJFINANCE',
     yfSymbol: 'BAJFINANCE.NS',
     category: 'Stock',
-    basePrice: 7540.00,
-    lotSize: 125,
+    basePrice: 985.70,
+    lotSize: 750,
     strikeStep: 50,
-    change: '+1.80%',
-    isPositive: true,
-    dayHigh: 7590.00,
-    dayLow: 7420.00
+    change: '-4.80%',
+    isPositive: false,
+    dayHigh: 1043.20,
+    dayLow: 974.00
   },
   {
     id: 'bhartiartl',
@@ -224,13 +207,13 @@ const FNO_INSTRUMENTS = [
     officialSymbol: 'NSE:BHARTIARTL',
     yfSymbol: 'BHARTIARTL.NS',
     category: 'Stock',
-    basePrice: 1650.00,
+    basePrice: 1788.40,
     lotSize: 475,
     strikeStep: 10,
-    change: '+0.30%',
-    isPositive: true,
-    dayHigh: 1665.00,
-    dayLow: 1640.00
+    change: '-3.27%',
+    isPositive: false,
+    dayHigh: 1853.80,
+    dayLow: 1787.50
   }
 ];
 
